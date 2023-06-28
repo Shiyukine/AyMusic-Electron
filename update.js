@@ -1,7 +1,10 @@
-var servUrl = "";
+var configUpdate = {
+    servUrl: ""
+}
+
 const searchUpdates = () => {
 
 }
 
-module.exports.servUrl = servUrl;
+module.exports.configUpdate = configUpdate;
 module.exports.searchUpdates = searchUpdates;

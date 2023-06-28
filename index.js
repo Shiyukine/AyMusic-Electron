@@ -3,9 +3,9 @@ const path = require("path");
 const url = require('url');
 var fs = require('fs');
 var { callBoundObject, codeInjecter } = require("./boundobject.js")
+var { initLogs, addLogs } = require("./logger.js")
 
 app.setPath('userData', app.getPath("userData") + "\\Cache\\WebCache\\");
-console.log(app.getPath("appData") + "\\AyMusic\\Cache\\Image\\")
 
 function mkdirp(dir) {
     if (fs.existsSync(dir)) { return true }
@@ -21,6 +21,7 @@ const filter = {
 }
 
 function createWindow() {
+    initLogs()
     const mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
@@ -117,6 +118,10 @@ function createWindow() {
             }
         }, 100)
         app.registerClient('Windows', '` + "v0.1" + "', " + "0" + `, window.boundobject)`)
+    });
+    mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+        //console.log('renderer console.%s: %s', ['debug', 'info', 'warn', 'error'][level], message);
+        addLogs(level, message, line, sourceId)
     });
 }
 

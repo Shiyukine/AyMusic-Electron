@@ -2,7 +2,8 @@ const { app, components, BrowserWindow, session, protocol, net, ipcMain, dialog 
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
-var { servUrl, searchUpdates } = require("./update.js")
+var { configUpdate, searchUpdates } = require("./update.js")
+var { configLogs } = require("./logger.js")
 
 var codeInjecter = []
 
@@ -25,7 +26,7 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('change-serv', (event, args, options) => {
-        servUrl = args
+        configUpdate.servUrl = args
     })
 
     ipcMain.on('minimize-window', (event, ignore, options) => {
@@ -50,12 +51,16 @@ const callBoundObject = () => {
 
     ipcMain.on('get-settings', async (event, args, options) => {
         fs.readFile(app.getPath('appData') + "\\AyMusic\\" + args, "utf-8", (error, data) => {
+            configLogs.write = JSON.parse(data)["gen_logs"]
+            //console.log(writeLogs)
             event.returnValue = data
         });
     })
 
     ipcMain.on('write-settings', async (event, args, options) => {
         fs.writeFile(app.getPath('appData') + "\\AyMusic\\" + args["file"], JSON.stringify(args["data"]), (error) => {
+            configLogs.write = args["data"]["gen_logs"]
+            //console.log(writeLogs)
         });
     })
 
