@@ -99,12 +99,16 @@ function createWindow() {
             }
             callback({ cancel: false, responseHeaders: details.responseHeaders })
         })
+        var platform = process.platform
+        if (platform == "darwin") platform = "MacOS"
+        if (platform == "win32") platform = "Windows"
+        if (platform == "linux") platform = "Linux"
         mainWindow.webContents.executeJavaScript(`
         var intev = setInterval(() => {
             if(!loaded) {
                 console.log('Attempt registerClient')
                 if(typeof app != 'undefined' && app) {
-                    app.registerClient('Windows', '` + "v0.1" + "', " + "0" + `, window.boundobject)
+                    app.registerClient('` + platform + `', '` + "v0.1" + "', " + "0" + `, window.boundobject)
                     clearInterval(intev)
                 }
             }
