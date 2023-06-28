@@ -31,6 +31,7 @@ function createWindow() {
             contextIsolation: true,
             preload: path.join(__dirname, "preload.js"),
         },
+        icon: __dirname + "/res/favicon.ico"
         //titleBarOverlay: true
     });
     protocol.handle('app', async (request) => {
