@@ -2,7 +2,7 @@ const { app, components, BrowserWindow, session, protocol, net, webFrameMain } =
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
-var { callBoundObject, codeInjecter } = require("./boundobject.js")
+var { callBoundObject, codeInjecter, clientToken } = require("./boundobject.js")
 var { initLogs, addLogs } = require("./logger.js")
 
 app.setPath('userData', app.getPath("userData") + "\\Cache\\WebCache\\");
@@ -84,6 +84,12 @@ function createWindow() {
     mainWindow.webContents.on('dom-ready', (e) => {
         session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
             details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
+            if (details.requestHeaders["authorization"]) {
+                if (details.url.includes("spotify.com")) {
+                    console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
+                    clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
+                }
+            }
             callback({ cancel: false, requestHeaders: details.requestHeaders })
         })
         session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {

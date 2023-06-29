@@ -6,6 +6,7 @@ var { configUpdate, searchUpdates } = require("./update.js")
 var { configLogs } = require("./logger.js")
 
 var codeInjecter = []
+var clientToken = {}
 
 function mkdirp(dir) {
     if (fs.existsSync(dir)) { return true }
@@ -86,6 +87,27 @@ const callBoundObject = () => {
         })
     })
 
+    ipcMain.on('custom-fetch', async (event, args, options) => {
+        event.returnValue = await (await net.fetch(args["url"], args["config"])).text()
+    })
+
+    ipcMain.on('open-website', async (event, args, options) => {
+        var baseUrl = args["baseUrl"]
+        var closeUrl = args["closeUrl"]
+        const win = new BrowserWindow({
+            width: 800,
+            height: 600,
+            icon: __dirname + "/res/favicon.ico"
+            //titleBarOverlay: true
+        });
+        win.webContents.on("did-navigate", (event, url, httpResponseCode, httpStatusText) => {
+            if (url.includes(closeUrl)) {
+                win.close()
+            }
+        })
+        win.loadURL(baseUrl)
+    })
+
     ipcMain.on('save-cache', async (event, args, options) => {
         var url = app.getPath('appData') + "\\AyMusic\\Cache\\" + args["fileName"].split("/").join("\\")
         mkdirp(path.dirname(url))
@@ -93,7 +115,12 @@ const callBoundObject = () => {
         fs.writeFile(url, Buffer.from(args["bytes"]), function (err) {
         })
     })
+
+    ipcMain.on('client-token', async (event, args, options) => {
+        event.returnValue = clientToken[args]
+    })
 }
 
 module.exports.callBoundObject = callBoundObject;
 module.exports.codeInjecter = codeInjecter;
+module.exports.clientToken = clientToken;

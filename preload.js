@@ -27,13 +27,16 @@ contextBridge.exposeInMainWorld("boundobject", {
         })
     },
     httpRequestGET: async (url) => {
-        return await (await fetch(url)).text()
+        return ipcRenderer.sendSync("custom-fetch", { url: url, config: undefined })
     },
     httpRequestPOST: async (url, json) => {
-        return await (await fetch(url, {
-            method: "POST",
-            body: JSON.stringify(json)
-        })).text()
+        return ipcRenderer.sendSync("custom-fetch", {
+            url: url,
+            config: {
+                method: "POST",
+                body: JSON.stringify(json)
+            }
+        })
     },
     changeServURL: (url) => {
         ipcRenderer.send("change-serv", url)
@@ -78,5 +81,11 @@ contextBridge.exposeInMainWorld("boundobject", {
     },
     saveCache: (fileName, bytes) => {
         ipcRenderer.send("save-cache", { fileName: fileName, bytes: bytes })
+    },
+    openWebsiteInNewWindow: (baseUrl, closeUrl = undefined) => {
+        ipcRenderer.send("open-website", { baseUrl: baseUrl, closeUrl: closeUrl })
+    },
+    getClientToken: (key) => {
+        return ipcRenderer.sendSync("client-token", key)
     }
 });
