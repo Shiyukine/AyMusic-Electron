@@ -73,8 +73,8 @@ function createWindow() {
             const frame = webFrameMain.fromId(frameProcessId, frameRoutingId)
             if (frame) {
                 for (let i in codeInjecter) {
-                    if (frame.url.includes(codeInjecter[i]["url"])) {
-                        const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"] + "')"
+                    if (encodeURI(decodeURI(frame.url)).includes(codeInjecter[i]["url"])) {
+                        const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].replace("'", "\\'") + "')"
                         frame.executeJavaScript(code)
                     }
                 }
