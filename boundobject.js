@@ -52,7 +52,7 @@ const callBoundObject = () => {
 
     ipcMain.on('get-settings', async (event, args, options) => {
         fs.readFile(app.getPath('appData') + "\\AyMusic\\" + args, "utf-8", (error, data) => {
-            if(data) configLogs.write = JSON.parse(data)["gen_logs"]
+            if (data) configLogs.write = JSON.parse(data)["gen_logs"]
             //console.log(writeLogs)
             event.returnValue = data
         });
@@ -88,7 +88,7 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('custom-fetch', async (event, args, options) => {
-        event.returnValue = await (await net.fetch(args["url"], args["config"])).text()
+        event.returnValue = await (await net.fetch(args["url"] + (args["url"].includes("?") ? "&" : "?") + "date=" + Date.now(), args["config"])).text()
     })
 
     ipcMain.on('open-website', async (event, args, options) => {
