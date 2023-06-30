@@ -52,7 +52,7 @@ const callBoundObject = () => {
 
     ipcMain.on('get-settings', async (event, args, options) => {
         fs.readFile(app.getPath('appData') + "\\AyMusic\\" + args, "utf-8", (error, data) => {
-            configLogs.write = JSON.parse(data)["gen_logs"]
+            if(data) configLogs.write = JSON.parse(data)["gen_logs"]
             //console.log(writeLogs)
             event.returnValue = data
         });

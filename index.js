@@ -94,6 +94,7 @@ function createWindow() {
         })
         session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
             if (details.url.includes("spotify.com")) {
+                details.responseHeaders["access-control-allow-origin"] = "*"
                 delete details.responseHeaders['content-security-policy']
                 delete details.responseHeaders['x-frame-options']
                 for (let i in details.responseHeaders["set-cookie"]) {
