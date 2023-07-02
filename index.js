@@ -93,10 +93,10 @@ function createWindow() {
             callback({ cancel: false, requestHeaders: details.requestHeaders })
         })
         session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
+            delete details.responseHeaders['x-frame-options']
             if (details.url.includes("spotify.com")) {
                 details.responseHeaders["access-control-allow-origin"] = "*"
                 delete details.responseHeaders['content-security-policy']
-                delete details.responseHeaders['x-frame-options']
                 for (let i in details.responseHeaders["set-cookie"]) {
                     if (details.responseHeaders["set-cookie"][i].includes("SameSite=Lax")) {
                         details.responseHeaders["set-cookie"][i] = details.responseHeaders["set-cookie"][i].split("SameSite=Lax").join("SameSite=None; Secure")
