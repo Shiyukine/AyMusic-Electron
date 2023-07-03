@@ -4,6 +4,9 @@ const url = require('url');
 var fs = require('fs');
 var { callBoundObject, codeInjecter, clientToken } = require("./boundobject.js")
 var { initLogs, addLogs } = require("./logger.js")
+var { ElectronBlocker } = require("@cliqz/adblocker-electron");
+//import { ElectronBlocker } from '@cliqz/adblocker-electron';
+var fetch = require("cross-fetch")
 
 app.setPath('userData', app.getPath("userData") + "\\Cache\\WebCache\\");
 
@@ -20,7 +23,7 @@ const filter = {
     urls: ['*://*/*']
 }
 
-function createWindow() {
+async function createWindow() {
     initLogs()
     const mainWindow = new BrowserWindow({
         width: 1280,
@@ -74,14 +77,14 @@ function createWindow() {
             if (frame) {
                 for (let i in codeInjecter) {
                     if (encodeURI(decodeURI(frame.url)).includes(codeInjecter[i]["url"])) {
-                        const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].replace("'", "\\'") + "')"
+                        const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].split("'").join("\\'") + "')"
                         frame.executeJavaScript(code)
                     }
                 }
             }
         }
     )
-    mainWindow.webContents.on('dom-ready', (e) => {
+    mainWindow.webContents.on('dom-ready', async (e) => {
         session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
             details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
             if (details.requestHeaders["authorization"]) {
@@ -92,11 +95,20 @@ function createWindow() {
             }
             callback({ cancel: false, requestHeaders: details.requestHeaders })
         })
-        session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
+        const blocker = await ElectronBlocker.fromLists(fetch, [
+            'https://easylist.to/easylist/easylist.txt',
+            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
+            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
+            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
+            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
+            "https://easylist.to/easylist/easyprivacy.txt",
+        ]);
+        blocker.enableBlockingInSession(session.defaultSession);
+        /*session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
             delete details.responseHeaders['x-frame-options']
+            delete details.responseHeaders['content-security-policy-report-only']
             if (details.url.includes("spotify.com")) {
-                details.responseHeaders["access-control-allow-origin"] = "*"
-                delete details.responseHeaders['content-security-policy']
                 for (let i in details.responseHeaders["set-cookie"]) {
                     if (details.responseHeaders["set-cookie"][i].includes("SameSite=Lax")) {
                         details.responseHeaders["set-cookie"][i] = details.responseHeaders["set-cookie"][i].split("SameSite=Lax").join("SameSite=None; Secure")
@@ -105,9 +117,26 @@ function createWindow() {
                         details.responseHeaders["set-cookie"][i] += "; SameSite=None"
                     }
                 }
+                details.responseHeaders["access-control-allow-origin"] = "*"
+                delete details.responseHeaders['content-security-policy']
+            }
+            if (details.url.includes("youtube.com")) {
+                const frame = details.frame
+                if (frame) {
+                    for (let i in codeInjecter) {
+                        if (encodeURI(decodeURI(frame.url)).includes(codeInjecter[i]["url"])) {
+                            const code = "if(typeof intytb == 'undefined') { let intytb = setInterval(() => { if(typeof scriptLoad == 'undefined') { try { document.getElementsByTagName('video')[0].pause(); } catch(e) {  } } else { clearInterval(intytb); } }, 1) }"
+                            frame.executeJavaScript(code)
+                        }
+                    }
+                }
             }
             callback({ cancel: false, responseHeaders: details.responseHeaders })
-        })
+        })*/
+        /*var anBlockerHeaders = blocker.onHeadersReceived
+        blocker.onHeadersReceived = (details, callback) => {
+            anBlockerHeaders(details, callback)
+        }*/
         var platform = process.platform
         if (platform == "darwin") platform = "MacOS"
         if (platform == "win32") platform = "Windows"
