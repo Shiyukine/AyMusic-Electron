@@ -4,6 +4,7 @@ const url = require('url');
 var fs = require('fs');
 var { configUpdate, searchUpdates } = require("./update.js")
 var { configLogs } = require("./logger.js")
+const DiscordRPC = require('discord-rpc');
 
 var codeInjecter = []
 var clientToken = {}
@@ -16,6 +17,10 @@ function mkdirp(dir) {
 }
 
 const callBoundObject = () => {
+    const rpc = new DiscordRPC.Client({ transport: 'ipc' });
+    const clientId = "1125877607817285742"
+    rpc.login({ clientId }).catch(console.error);
+
     ipcMain.on('set-ignore-mouse-events', (event, ignore, options) => {
         const win = BrowserWindow.fromWebContents(event.sender)
         win.setIgnoreMouseEvents(ignore, options)
@@ -118,6 +123,10 @@ const callBoundObject = () => {
 
     ipcMain.on('client-token', async (event, args, options) => {
         event.returnValue = clientToken[args]
+    })
+
+    ipcMain.on('discord-rpc', async (event, args, options) => {
+        rpc.setActivity(args);
     })
 }
 

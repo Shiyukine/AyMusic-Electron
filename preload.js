@@ -87,5 +87,8 @@ contextBridge.exposeInMainWorld("boundobject", {
     },
     getClientToken: (key) => {
         return ipcRenderer.sendSync("client-token", key)
+    },
+    discordRPC: (args) => {
+        ipcRenderer.send("discord-rpc", args)
     }
 });
