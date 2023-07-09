@@ -90,5 +90,13 @@ contextBridge.exposeInMainWorld("boundobject", {
     },
     discordRPC: (args) => {
         ipcRenderer.send("discord-rpc", args)
+    },
+    onUpdateStateChange: (cb) => {
+        ipcRenderer.on("update-state-change", (event, args, options) => {
+            cb(args)
+        })
+    },
+    searchUpdates: () => {
+        ipcRenderer.send("search-updates")
     }
 });

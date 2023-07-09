@@ -8,7 +8,7 @@ var { ElectronBlocker } = require("@cliqz/adblocker-electron");
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
 var fetch = require("cross-fetch")
 
-app.setPath('userData', app.getPath("userData") + "\\Cache\\WebCache\\");
+app.setPath('userData', app.getPath("userData") + "/Cache/WebCache/");
 
 function mkdirp(dir) {
     if (fs.existsSync(dir)) { return true }
@@ -17,7 +17,7 @@ function mkdirp(dir) {
     fs.mkdirSync(dir);
 }
 
-mkdirp(app.getPath("appData") + "\\AyMusic\\Cache\\Adblock\\")
+mkdirp(app.getPath("appData") + "/AyMusic/Cache/Adblock/")
 
 const filter = {
     urls: ['*://*/*']
@@ -56,7 +56,7 @@ async function createWindow() {
             })
         }
         if (request.url.includes("app://cache")) {
-            const filePath = app.getPath("appData") + "\\AyMusic\\Cache\\" + request.url.slice('app://cache/'.length)
+            const filePath = app.getPath("appData") + "/AyMusic/Cache/" + request.url.slice('app://cache/'.length)
             //return net.fetch("file://" + filePath)
             var file = await net.fetch("file://" + filePath, {
                 headers: request.headers
@@ -89,7 +89,7 @@ async function createWindow() {
             details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
             if (details.requestHeaders["authorization"]) {
                 if (details.url.includes("spotify.com")) {
-                    console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
+                    //console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
                     clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
                 }
             }

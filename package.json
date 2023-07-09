@@ -14,7 +14,9 @@
     "cross-fetch": "^3.1.7",
     "discord-rpc": "^4.0.1",
     "electron": "https://github.com/castlabs/electron-releases#v25.1.1+wvcus",
+    "electron-dl": "^3.5.0",
     "electron-fetch": "^1.9.1",
-    "electron-forge": "^5.2.4"
+    "electron-forge": "^5.2.4",
+    "node-dir": "^0.1.17"
   }
 }

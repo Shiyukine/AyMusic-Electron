@@ -128,6 +128,10 @@ const callBoundObject = () => {
     ipcMain.on('discord-rpc', async (event, args, options) => {
         rpc.setActivity(args);
     })
+
+    ipcMain.on('search-updates', async (event, args, options) => {
+        searchUpdates(event)
+    })
 }
 
 module.exports.callBoundObject = callBoundObject;
