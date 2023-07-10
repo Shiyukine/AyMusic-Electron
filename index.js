@@ -7,6 +7,7 @@ var { initLogs, addLogs } = require("./logger.js")
 var { ElectronBlocker } = require("@cliqz/adblocker-electron");
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
 var fetch = require("cross-fetch")
+var { configUpdate } = require("./update.js")
 
 app.setPath('userData', app.getPath("userData") + "/Cache/WebCache/");
 
@@ -146,7 +147,7 @@ async function createWindow() {
             if(!loaded) {
                 console.log('Attempt registerClient')
                 if(typeof app != 'undefined' && app) {
-                    app.registerClient('` + platform + `', '` + "v0.1" + "', " + "0" + `, window.boundobject)
+                    app.registerClient('` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject)
                     clearInterval(intev)
                 }
             }
@@ -154,7 +155,7 @@ async function createWindow() {
                 clearInterval(intev)
             }
         }, 100)
-        app.registerClient('Windows', '` + "v0.1" + "', " + "0" + `, window.boundobject)`)
+        app.registerClient('Windows', '` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject)`)
     });
     mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
         //console.log('renderer console.%s: %s', ['debug', 'info', 'warn', 'error'][level], message);
