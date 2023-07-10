@@ -96,7 +96,7 @@ async function createWindow() {
             }
             callback({ cancel: false, requestHeaders: details.requestHeaders })
         })
-        const blocker = await ElectronBlocker.fromLists(fetch, [
+        ElectronBlocker.fromLists(fetch, [
             'https://easylist.to/easylist/easylist.txt',
             "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
             "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
@@ -104,8 +104,9 @@ async function createWindow() {
             "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
             "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
             "https://easylist.to/easylist/easyprivacy.txt",
-        ]);
-        blocker.enableBlockingInSession(session.defaultSession);
+        ]).then(blocker => {
+            blocker.enableBlockingInSession(session.defaultSession);
+        });
         /*session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
             delete details.responseHeaders['x-frame-options']
             delete details.responseHeaders['content-security-policy-report-only']
