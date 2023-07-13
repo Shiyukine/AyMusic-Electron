@@ -156,7 +156,7 @@ async function createWindow() {
                 clearInterval(intev)
             }
         }, 100)
-        app.registerClient('Windows', '` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject)`)
+        app.registerClient('` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject)`)
     });
     mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
         //console.log('renderer console.%s: %s', ['debug', 'info', 'warn', 'error'][level], message);
