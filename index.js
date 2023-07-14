@@ -85,28 +85,28 @@ async function createWindow() {
             }
         }
     )
-    mainWindow.webContents.on('dom-ready', async (e) => {
-        session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-            details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
-            if (details.requestHeaders["authorization"]) {
-                if (details.url.includes("spotify.com")) {
-                    //console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
-                    clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
-                }
+    session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+        details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
+        if (details.requestHeaders["authorization"]) {
+            if (details.url.includes("spotify.com")) {
+                //console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
+                clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
             }
-            callback({ cancel: false, requestHeaders: details.requestHeaders })
-        })
-        ElectronBlocker.fromLists(fetch, [
-            'https://easylist.to/easylist/easylist.txt',
-            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
-            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
-            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
-            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
-            "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
-            "https://easylist.to/easylist/easyprivacy.txt",
-        ]).then(blocker => {
-            blocker.enableBlockingInSession(session.defaultSession);
-        });
+        }
+        callback({ cancel: false, requestHeaders: details.requestHeaders })
+    })
+    ElectronBlocker.fromLists(fetch, [
+        'https://easylist.to/easylist/easylist.txt',
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
+        "https://easylist.to/easylist/easyprivacy.txt",
+    ]).then(blocker => {
+        blocker.enableBlockingInSession(session.defaultSession);
+    });
+    mainWindow.webContents.on('dom-ready', async (e) => {
         /*session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
             delete details.responseHeaders['x-frame-options']
             delete details.responseHeaders['content-security-policy-report-only']
@@ -143,6 +143,8 @@ async function createWindow() {
         if (platform == "darwin") platform = "MacOS"
         if (platform == "win32") platform = "Windows"
         if (platform == "linux") platform = "Linux"
+        //for testing only
+        //platform = "Android"
         mainWindow.webContents.executeJavaScript(`
         var intev = setInterval(() => {
             if(!loaded) {
