@@ -69,6 +69,19 @@ async function createWindow() {
                 headers: file.headers
             })
         }
+        if (request.url.includes("app://data")) {
+            const filePath = app.getPath("appData") + "/AyMusic/Data/" + request.url.slice('app://data/'.length)
+            //return net.fetch("file://" + filePath)
+            var file = await net.fetch("file://" + filePath, {
+                headers: request.headers
+            })
+            var fileContent = await file.arrayBuffer()
+            file.headers.append("Accept-Ranges", "bytes")
+            file.headers.append("Content-Length", fileContent.byteLength)
+            return new Response(fileContent, {
+                headers: file.headers
+            })
+        }
     })
     mainWindow.loadURL("app://root/index.html");
     mainWindow.webContents.on(

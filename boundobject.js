@@ -114,15 +114,25 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('save-cache', async (event, args, options) => {
-        var url = app.getPath('appData') + "\\AyMusic\\Cache\\" + args["fileName"].split("/").join("\\")
+        var url = app.getPath('appData') + "/AyMusic/Cache/" + args["fileName"]
         mkdirp(path.dirname(url))
         fs.appendFileSync(url, "")
-        fs.writeFile(url, Buffer.from(args["bytes"]), function (err) {
-        })
+        fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { })
+    })
+
+    ipcMain.on('save-data', async (event, args, options) => {
+        var url = app.getPath('appData') + "/AyMusic/Data/" + args["fileName"]
+        mkdirp(path.dirname(url))
+        fs.appendFileSync(url, "")
+        fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { })
     })
 
     ipcMain.on('client-token', async (event, args, options) => {
         event.returnValue = clientToken[args]
+    })
+
+    ipcMain.on('rm-client-token', async (event, args, options) => {
+        delete clientToken[args]
     })
 
     ipcMain.on('discord-rpc', async (event, args, options) => {

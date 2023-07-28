@@ -82,11 +82,17 @@ contextBridge.exposeInMainWorld("boundobject", {
     saveCache: (fileName, bytes) => {
         ipcRenderer.send("save-cache", { fileName: fileName, bytes: bytes })
     },
+    saveData: (fileName, bytes) => {
+        ipcRenderer.send("save-data", { fileName: fileName, bytes: bytes })
+    },
     openWebsiteInNewWindow: (baseUrl, closeUrl = undefined) => {
         ipcRenderer.send("open-website", { baseUrl: baseUrl, closeUrl: closeUrl })
     },
     getClientToken: (key) => {
         return ipcRenderer.sendSync("client-token", key)
+    },
+    removeClientToken: (key) => {
+        return ipcRenderer.sendSync("rm-client-token", key)
     },
     discordRPC: (args) => {
         ipcRenderer.send("discord-rpc", args)
