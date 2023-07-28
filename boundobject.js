@@ -71,13 +71,8 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('register-frame-url', async (event, args, options) => {
-        var exists = false
         var val = { url: args["url"], code: args["code"] }
-        for (let code of codeInjecter) {
-            exists ||= code["url"] == val.url
-        }
-        if (!exists)
-            codeInjecter.push(val)
+        codeInjecter.push(val)
     })
 
     ipcMain.on('show-dialog', (event, ignore, options) => {
