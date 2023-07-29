@@ -4,6 +4,7 @@ const electronDl = require('electron-dl');
 const fs = require('fs');
 const path = require('path');
 const { resolve } = require('path');
+const { addLogs } = require('./logger.js');
 const { readdir } = require('fs').promises;
 
 async function getFiles(dir) {
@@ -45,21 +46,33 @@ function mkdirp(dir) {
 
 function dlFile(win, appPath, dlPathServ, platform, file) {
     return new Promise(async resolve => {
-        let dl = await electronDl.download(win, dlPathServ.split("%platform%").join(platform).split("%file%").join(file), {
-            directory: appPath + "/DownloadTemp/",
-            onTotalProgress: (e) => {
-                win.webContents.send('update-state-change', {
-                    step: 4,
-                    file: file,
-                    cur: e.transferredBytes,
-                    max: e.totalBytes
-                })
-            },
-            onCompleted: (e) => {
-                resolve()
-            },
-            overwrite: true
-        })
+        try {
+            mkdirp(appPath + "/DownloadTemp/" + file.split("/").slice(0, -1).join("/") + "/")
+            let dl = await electronDl.download(win, dlPathServ.split("%platform%").join(platform).split("%file%").join(file), {
+                directory: appPath + "/DownloadTemp/" + file.split("/").slice(0, -1).join("/") + "/",
+                onTotalProgress: (e) => {
+                    win.webContents.send('update-state-change', {
+                        step: 4,
+                        file: file,
+                        cur: e.transferredBytes,
+                        max: e.totalBytes
+                    })
+                },
+                onCompleted: (e) => {
+                    resolve()
+                },
+                overwrite: true
+            })
+        }
+        catch (e) {
+            win.webContents.send('update-state-change', {
+                step: -2,
+                error: e,
+                file: null,
+                cur: 0,
+                max: 1
+            })
+        }
     })
 }
 
@@ -103,7 +116,7 @@ const searchUpdates = async (event) => {
         for (let i in files) {
             let file = files[i]
             try {
-                clientJsonOut[path.basename(file)] = await getChecksum(file)
+                clientJsonOut[file.split("\\").join("/").split(appPath.split("\\").join("/") + "/").join("")] = await getChecksum(file)
                 win.webContents.send('update-state-change', {
                     step: 1,
                     file: file,
@@ -112,10 +125,16 @@ const searchUpdates = async (event) => {
                 })
             }
             catch (e) {
-                console.log(e)
+                win.webContents.send('update-state-change', {
+                    step: -2,
+                    error: e,
+                    file: null,
+                    cur: 0,
+                    max: 1
+                })
             }
         }
-        //console.log(JSON.stringify(clientJsonOut))
+        console.log(JSON.stringify(clientJsonOut))
         let filesToUpdate = []
         for (let i in servJsonOut) {
             let file = servJsonOut[i]

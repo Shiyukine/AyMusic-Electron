@@ -5,18 +5,60 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "buildMac": "electron-builder -m",
+    "buildWin": "electron-builder -w",
+    "buildLinux": "electron-builder -l"
   },
   "author": "Shiyukine",
   "license": "ISC",
+  "devDependencies": {
+    "electron": "https://github.com/castlabs/electron-releases#v25.1.1+wvcus",
+    "electron-builder": "^24.6.3"
+  },
   "dependencies": {
     "@cliqz/adblocker-electron": "^1.26.6",
     "cross-fetch": "^3.1.7",
     "discord-rpc": "^4.0.1",
-    "electron": "https://github.com/castlabs/electron-releases#v25.1.1+wvcus",
     "electron-dl": "^3.5.0",
     "electron-fetch": "^1.9.1",
     "electron-forge": "^5.2.4",
+    "electron-is-packaged": "^1.0.2",
     "node-dir": "^0.1.17"
+  },
+  "build": {
+    "files": [
+      "**/*",
+      "!.git/**/*",
+      "!res/node_modules/**/*"
+    ],
+    "appId": "com.aketsuky.aymusic",
+    "copyright": "Aketsuky™",
+    "electronDownload": {
+      "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
+    },
+    "afterPack": "./build/afterPack.js",
+    "afterSign": "./build/afterSign.js",
+    "mac": {
+      "category": "public.app-category.audio"
+    },
+    "win": {
+      "verifyUpdateCodeSignature": false,
+      "target": [
+        "zip"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "category": "Audio",
+      "target": [
+        "AppImage",
+        "snap",
+        "deb"
+      ]
+    },
+    "publish": {
+      "provider": "github"
+    }
   }
 }

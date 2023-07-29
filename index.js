@@ -8,6 +8,7 @@ var { ElectronBlocker } = require("@cliqz/adblocker-electron");
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
 var fetch = require("cross-fetch")
 var { configUpdate } = require("./update.js")
+const isPackaged = require('electron-is-packaged').isPackaged;
 
 app.setPath('userData', app.getPath("userData") + "/Cache/WebCache/");
 
@@ -33,6 +34,8 @@ async function createWindow() {
         useContentSize: true,
         webPreferences: {
             contextIsolation: true,
+            //nodeIntegration: true, //WARNING SECURITY RISKS !!!
+            sandbox: false, //security risks ??
             preload: path.join(__dirname, "preload.js"),
         },
         icon: __dirname + "/res/favicon.ico"
@@ -163,7 +166,7 @@ async function createWindow() {
             if(!loaded) {
                 console.log('Attempt registerClient')
                 if(typeof app != 'undefined' && app) {
-                    app.registerClient('` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject)
+                    app.registerClient('` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject,` + isPackaged + `)
                     clearInterval(intev)
                 }
             }
@@ -171,7 +174,7 @@ async function createWindow() {
                 clearInterval(intev)
             }
         }, 100)
-        app.registerClient('` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject)`)
+        app.registerClient('` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject,` + isPackaged + `)`)
     });
     mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
         //console.log('renderer console.%s: %s', ['debug', 'info', 'warn', 'error'][level], message);
