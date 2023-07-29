@@ -110,7 +110,12 @@ const callBoundObject = () => {
                 win.close()
             }
         })
-        win.loadURL(baseUrl)
+        win.removeMenu()
+        //let ua = win.webContents.userAgent;
+        //ua = ua.replace(/aymusic\/[0-9\.-]*/, '');
+        //ua = ua.replace(/Electron\/*/, '');
+        //win.webContents.userAgent = ua;
+        win.loadURL(baseUrl/*, { userAgent: 'Chrome' }*/)
     })
 
     ipcMain.on('save-cache', async (event, args, options) => {

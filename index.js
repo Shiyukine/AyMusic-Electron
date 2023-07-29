@@ -86,7 +86,7 @@ async function createWindow() {
             })
         }
     })
-    mainWindow.loadURL("app://root/index.html");
+    mainWindow.loadURL("app://root/index.html"/*, { userAgent: "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36" }*/);
     mainWindow.webContents.on(
         'did-frame-navigate',
         (event, url, httpResponseCode, httpStatusText, isMainFrame, frameProcessId, frameRoutingId) => {
@@ -102,7 +102,10 @@ async function createWindow() {
         }
     )
     session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-        details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
+        if (!details.url.includes("google.com"))
+            details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
+        else
+            details.requestHeaders['User-Agent'] = "Chrome"
         if (details.requestHeaders["authorization"]) {
             if (details.url.includes("spotify.com")) {
                 //console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
