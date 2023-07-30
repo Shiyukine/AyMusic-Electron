@@ -5,7 +5,8 @@ import sys
 
 
 out = {}
-out["***INFOS***"] = "https://192.168.0.33/dl/AyMusic/dlTemp/%platform%/%file%"
+#out["***INFOS***"] = "https://192.168.0.33/dl/AyMusic/dlTemp/%platform%/%file%"
+out["***INFOS***"] = "https://files.aketsuky.net/dl/AyMusic/Updates/%platform%/%file%"
 plat = sys.argv[1]
 platform = ""
 if plat == "win":
