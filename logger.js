@@ -5,11 +5,9 @@ var configLogs = { write: true }
 const logPath = app.getPath("appData") + "\\AyMusic\\latest.log"
 
 const addLogs = (level, message, line, sourceId) => {
-    if (configLogs.write) {
-        fs.appendFile(logPath, "[" + ['debug', 'info', 'warn', 'error'][level] + " @ " + sourceId + ":" + line + "] " + message + "\n", (error) => {
-            if (error) console.error(error)
-        })
-    }
+    fs.appendFile(logPath, "[" + ['debug', 'info', 'warn', 'error'][level] + " @ " + sourceId + ":" + line + "] " + message + "\n", (error) => {
+        if (error) console.error(error)
+    })
 }
 
 const initLogs = () => {
