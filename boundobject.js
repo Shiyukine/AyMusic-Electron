@@ -93,7 +93,13 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('custom-fetch', async (event, args, options) => {
-        event.returnValue = await (await net.fetch(args["url"] + (args["url"].includes("?") ? "&" : "?") + "date=" + Date.now(), args["config"])).text()
+        try {
+            event.returnValue = await (await net.fetch(args["url"] + (args["url"].includes("?") ? "&" : "?") + "date=" + Date.now(), args["config"])).text()
+        }
+        catch (e) {
+            console.error(e)
+            event.returnValue = e + ""
+        }
     })
 
     ipcMain.on('open-website', async (event, args, options) => {
