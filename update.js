@@ -18,8 +18,9 @@ async function getFiles(dir) {
 
 var configUpdate = {
     servUrl: "",
-    versionName: "0.1.2",
-    versionCode: 3
+    versionName: "0.1.3",
+    versionCode: 4,
+    isRelease: false
 }
 
 function getChecksum(path) {
@@ -76,11 +77,37 @@ function dlFile(win, appPath, dlPathServ, platform, file) {
     })
 }
 
+function dlFileNotTemp(win, appPath, dlPathServ, platform, file) {
+    return new Promise(async resolve => {
+        try {
+            let dl = await electronDl.download(win, dlPathServ.split("%platform%").join(platform).split("%file%").join(file), {
+                directory: appPath + file.split("/").slice(0, -1).join("/") + "/",
+                onCompleted: (e) => {
+                    resolve()
+                },
+                overwrite: true
+            })
+        }
+        catch (e) {
+            win.webContents.send('update-state-change', {
+                step: -2,
+                error: e,
+                file: null,
+                cur: 0,
+                max: 1
+            })
+        }
+    })
+}
+
 const searchUpdates = async (event) => {
     process.noAsar = true
-    let appPath = path.dirname(app.getPath("exe"))
-    fs.rm(appPath + "/AketsukyUpdaterTEMP.exe", () => { })
+    var platform = process.platform
+    if (platform == "darwin") platform = "macos"
+    if (platform == "win32") platform = "windows"
+    if (platform == "linux") platform = "linux"
     let win = BrowserWindow.fromWebContents(event.sender)
+    let appPath = ""
     try {
         win.webContents.send('update-state-change', {
             step: 0,
@@ -88,10 +115,6 @@ const searchUpdates = async (event) => {
             cur: 0,
             max: 100
         })
-        var platform = process.platform
-        if (platform == "darwin") platform = "macos"
-        if (platform == "win32") platform = "windows"
-        if (platform == "linux") platform = "linux"
         let out = await (await net.fetch(configUpdate.servUrl + "/dl/AyMusic/update_" + platform + ".json?date=" + Date.now())).text()
         win.webContents.send('update-state-change', {
             step: 0,
@@ -111,6 +134,21 @@ const searchUpdates = async (event) => {
             cur: 100,
             max: 100
         })
+        if (platform == "windows") {
+            appPath = path.dirname(app.getPath("exe"))
+            fs.rm(appPath + "/AketsukyUpdaterTEMP.exe", () => { })
+            if (!fs.existsSync(appPath + "/AketsukyUpdater.exe") && configUpdate.isRelease) {
+                await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.exe")
+                win.webContents.send('update-state-change', {
+                    step: -2,
+                    error: "Some required files are not available. Try to desactivate your antivirus and retry.",
+                    file: null,
+                    cur: 0,
+                    max: 1
+                })
+                return
+            }
+        }
         let files = await getFiles(appPath)
         let clientJsonOut = {}
         for (let i in files) {

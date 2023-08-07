@@ -93,7 +93,7 @@ async function createWindow() {
             const frame = webFrameMain.fromId(frameProcessId, frameRoutingId)
             if (frame) {
                 for (let i in codeInjecter) {
-                    if (encodeURI(decodeURI(frame.url)).includes(codeInjecter[i]["url"])) {
+                    if (frame.url.includes(codeInjecter[i]["url"])) {
                         const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].split("'").join("\\'") + "')"
                         frame.executeJavaScript(code)
                     }
@@ -162,6 +162,7 @@ async function createWindow() {
         if (platform == "darwin") platform = "MacOS"
         if (platform == "win32") platform = "Windows"
         if (platform == "linux") platform = "Linux"
+        configUpdate.isRelease = isPackaged
         //for testing only
         //platform = "Android"
         mainWindow.webContents.executeJavaScript(`
