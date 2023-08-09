@@ -136,7 +136,7 @@ const searchUpdates = async (event) => {
         })
         if (platform == "windows") {
             appPath = path.dirname(app.getPath("exe"))
-            fs.rm(appPath + "/AketsukyUpdaterTEMP.exe", () => { })
+            fs.rmSync(appPath + "/AketsukyUpdaterTEMP.exe", () => { })
             if (!fs.existsSync(appPath + "/AketsukyUpdater.exe") && configUpdate.isRelease) {
                 await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.exe")
                 win.webContents.send('update-state-change', {
