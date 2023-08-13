@@ -1,4 +1,4 @@
-const { app, components, BrowserWindow, session, protocol, net, ipcMain, dialog } = require('electron');
+const { app, components, BrowserWindow, session, protocol, net, ipcMain, dialog, shell } = require('electron');
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
@@ -146,8 +146,18 @@ const callBoundObject = () => {
         delete clientToken[args]
     })
 
+    ipcMain.on('open-link', async (event, args, options) => {
+        shell.openExternal(args)
+    })
+
     ipcMain.on('discord-rpc', async (event, args, options) => {
-        rpc.setActivity(args);
+        try {
+            rpc.setActivity(args);
+        }
+        catch {
+            rpc.login({ clientId }).catch(console.error);
+            rpc.setActivity(args);
+        }
     })
 
     ipcMain.on('search-updates', async (event, args, options) => {

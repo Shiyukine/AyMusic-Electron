@@ -175,12 +175,18 @@ class ElectronBlocker extends adblocker_1.FiltersEngine {
             const CSP_HEADER_NAME = 'content-security-policy';
             const policies = [];
             const responseHeaders = details.responseHeaders || {};
+            if (!responseHeaders["Access-Control-Allow-Credentials".toLowerCase()]) {
+                for (let i in responseHeaders) {
+                    if (i.toLowerCase() == "access-control-allow-origin") delete responseHeaders[i]
+                }
+                responseHeaders["access-control-allow-origin"] = "*"
+            }
             if (details.resourceType === 'mainFrame' || details.resourceType === 'subFrame') {
                 const rawCSP = this.getCSPDirectives(fromElectronDetails(details));
                 //AyMusic code
                 delete responseHeaders['x-frame-options']
                 delete responseHeaders['content-security-policy-report-only']
-                if (details.url.includes("spotify.com")) {
+                if (details.url.includes("spotify.com") || details.url.includes("www.google.com") || details.url.includes("consent.google.com")) {
                     for (let i in responseHeaders["set-cookie"]) {
                         if (responseHeaders["set-cookie"][i].includes("SameSite=Lax")) {
                             responseHeaders["set-cookie"][i] = responseHeaders["set-cookie"][i].split("SameSite=Lax").join("SameSite=None; Secure")
@@ -189,7 +195,6 @@ class ElectronBlocker extends adblocker_1.FiltersEngine {
                             responseHeaders["set-cookie"][i] += "; SameSite=None"
                         }
                     }
-                    responseHeaders["access-control-allow-origin"] = "*"
                     delete responseHeaders['content-security-policy']
                 }
                 if (details.url.includes("youtube.com")) {

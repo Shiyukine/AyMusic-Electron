@@ -93,7 +93,7 @@ async function createWindow() {
             const frame = webFrameMain.fromId(frameProcessId, frameRoutingId)
             if (frame) {
                 for (let i in codeInjecter) {
-                    if (frame.url.includes(codeInjecter[i]["url"])) {
+                    if (encodeURI(decodeURIComponent(frame.url)).includes(encodeURI(decodeURIComponent(codeInjecter[i]["url"])))) {
                         const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].split("'").join("\\'") + "')"
                         frame.executeJavaScript(code)
                     }
@@ -102,7 +102,7 @@ async function createWindow() {
         }
     )
     session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-        if (!details.url.includes("google.com"))
+        if (!details.url.includes("accounts.google.com"))
             details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
         else
             details.requestHeaders['User-Agent'] = "Chrome"

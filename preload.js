@@ -73,6 +73,9 @@ contextBridge.exposeInMainWorld("boundobject", {
     normalWindow: () => {
         ipcRenderer.send("restore-window")
     },
+    openLink: (url) => {
+        ipcRenderer.send("open-link", url)
+    },
     registerIframeUrl: (url, script) => {
         ipcRenderer.send("register-frame-url", { url: url, code: script })
     },
