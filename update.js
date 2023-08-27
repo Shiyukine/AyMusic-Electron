@@ -141,7 +141,7 @@ const searchUpdates = async (event) => {
                 await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.exe")
                 win.webContents.send('update-state-change', {
                     step: -2,
-                    error: "Some required files are not available. Try to desactivate your antivirus and retry.",
+                    error: "Some required files are not available. Try to deactivate your antivirus and retry.",
                     file: null,
                     cur: 0,
                     max: 1
