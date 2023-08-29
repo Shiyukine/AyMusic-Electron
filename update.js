@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { app, BrowserWindow, net, shell } = require('electron');
+const { app, BrowserWindow, net, shell, remote } = require('electron');
 const electronDl = require('electron-dl');
 const fs = require('fs');
 const path = require('path');
@@ -141,7 +141,7 @@ const searchUpdates = async (event) => {
                 await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.exe")
                 win.webContents.send('update-state-change', {
                     step: -2,
-                    error: "Some required files are not available. Try to deactivate your antivirus and retry.",
+                    error: "Some required files are not available to update the app. Try to deactivate your antivirus and retry.",
                     file: null,
                     cur: 0,
                     max: 1
@@ -149,6 +149,66 @@ const searchUpdates = async (event) => {
                 return
             }
         }
+        if (platform == "linux") {
+            appPath = path.dirname(app.getPath("exe"))
+            console.log(appPath)
+            if (fs.existsSync(appPath + "/AketsukyUpdaterTEMP.sh")) fs.rmSync(appPath + "/AketsukyUpdaterTEMP.sh")
+            if (!fs.existsSync(appPath + "/AketsukyUpdater.sh") && configUpdate.isRelease) {
+                await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.sh")
+                /*win.webContents.send('update-state-change', {
+                    step: -2,
+                    error: "Some required files are not available to update the app. ",
+                    file: null,
+                    cur: 0,
+                    max: 1
+                })*/
+                return
+            }
+            fs.copyFileSync(appPath + "/AketsukyUpdater.sh", appPath + "/AketsukyUpdaterTEMP.sh")
+            const { execFileSync, exec, execFile, execSync } = require('node:child_process');
+            let spawn = require("child_process").spawn;
+            let out = fs.openSync('./out.log', 'a');
+            let err = fs.openSync('./out.log', 'a');
+            //powershell -command "start-process \"E:\\WorkSpaces\\Visual Studio\\AketsukyUpdater\\AketsukyUpdater\\bin\\Debug\\AketsukyUpdater.exe\" -ArgumentList \"--move-files\", \"--app=AyMusic\" "
+            let bat = execFile(appPath + "/AketsukyUpdaterTEMP.sh", [
+                "--move-files",
+                "--app",
+                "electron",
+            ], {
+                detached: true
+                //stdio: 'ignore',
+            });
+            bat.unref()
+            setTimeout(() => {
+                app.exit();
+            }, 1000)
+            /*bat.stdout.on("data", (data) => {
+                console.log(data.toString())
+            });
+
+            bat.stderr.on("data", (err) => {
+                console.log(err.toString())
+            });
+
+            bat.on("exit", (code) => {
+                console.log(code)
+                
+            });*/
+            //win.close()
+            /*bat.stdout.on("data", (data) => {
+                console.log(data.toString())
+            });
+
+            bat.stderr.on("data", (err) => {
+                console.log(err.toString())
+            });
+
+            bat.on("exit", (code) => {
+                console.log(code)
+                win.close()
+            });*/
+        }
+        /*
         let files = await getFiles(appPath)
         let clientJsonOut = {}
         for (let i in files) {
@@ -235,19 +295,42 @@ const searchUpdates = async (event) => {
                     win.close()
                 });
             }
+            else if (platform == "linux") {
+                fs.copyFileSync(appPath + "/AketsukyUpdater.sh", appPath + "/AketsukyUpdaterTEMP.sh")
+                let spawn = require("child_process").spawn;
+                let bat = spawn("./AketsukyUpdaterTEMP.sh", [
+                    "--move-files",
+                    "--app",
+                    "aymusic"
+                ]);
+                bat.stdout.on("data", (data) => {
+                    console.log(data.toString())
+                });
+
+                bat.stderr.on("data", (err) => {
+                    console.log(err.toString())
+                });
+
+                bat.on("exit", (code) => {
+                    console.log(code)
+                    win.close()
+                });
+            }
             //other platforms goes here
             else {
-                //we don't have an updater on this platform, so we will skip this update
+                //we don't have an updater on this platform, so we block the app
                 win.webContents.send('update-state-change', {
-                    step: -1,
+                    step: -2,
+                    error: "Your OS is not compatible with AyMusic. Sorry :(",
                     file: null,
-                    cur: 1,
+                    cur: 0,
                     max: 1
                 })
             }
-        }
+        }*/
     }
     catch (e) {
+        console.log(e)
         win.webContents.send('update-state-change', {
             step: -2,
             error: e,

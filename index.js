@@ -30,7 +30,7 @@ async function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
-        frame: false,
+        frame: process.platform != "win32",
         useContentSize: true,
         webPreferences: {
             contextIsolation: true,
