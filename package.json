@@ -1,8 +1,10 @@
 {
   "name": "aymusic",
   "version": "0.1.0",
-  "description": "All music platform in a one platform.",
+  "description": "AyMusic has been created by Shiyukine from Aketsuky in 2021. AyMusic allows you to create playlists with music on Spotify, Youtube, Deezer, Soundclound, Bandcamp and locally. You can use this application if you want to create a playlist of music on Spotify but there's some music that you can't find on Spotify but on another platform. With AyMusic you can do this without any problems. Create a playlist, add your music to one platform and then add it to other platforms and AyMusic will play your favourite music!",
   "main": "index.js",
+  "homepage": "https://aketsuky.net/projects/AyMusic.php",
+  "displayName": "AyMusic",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
@@ -49,9 +51,14 @@
     "linux": {
       "category": "Audio",
       "target": [
-        "deb"
+        "deb",
+        "pacman"
       ],
-      "icon": "build/icon.png"
+      "desktop": {
+        "Name": "AyMusic"
+      },
+      "artifactName": "AyMusic-${version}.${ext}",
+      "synopsis": "Your music in a one platform."
     },
     "publish": {
       "provider": "github"

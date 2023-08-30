@@ -254,6 +254,7 @@ const searchUpdates = async (event) => {
             else if (platform == "linux") {
                 fs.copyFileSync(appPath + "/AketsukyUpdater.sh", appPath + "/AketsukyUpdaterTEMP.sh")
                 const { execFileSync, exec, execFile, execSync, fork, spawn } = require('node:child_process');
+                execSync("chmod +x \"" + appPath + "/AketsukyUpdaterTEMP.sh" + "\"");
                 let out = fs.openSync('./out.log', 'a');
                 let err = fs.openSync('./out.log', 'a');
                 //powershell -command "start-process \"E:\\WorkSpaces\\Visual Studio\\AketsukyUpdater\\AketsukyUpdater\\bin\\Debug\\AketsukyUpdater.exe\" -ArgumentList \"--move-files\", \"--app=AyMusic\" "
