@@ -151,7 +151,6 @@ const searchUpdates = async (event) => {
         }
         if (platform == "linux") {
             appPath = path.dirname(app.getPath("exe"))
-            console.log(appPath)
             if (fs.existsSync(appPath + "/AketsukyUpdaterTEMP.sh")) fs.rmSync(appPath + "/AketsukyUpdaterTEMP.sh")
             if (!fs.existsSync(appPath + "/AketsukyUpdater.sh") && configUpdate.isRelease) {
                 await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.sh")
@@ -165,8 +164,7 @@ const searchUpdates = async (event) => {
                 return
             }
             fs.copyFileSync(appPath + "/AketsukyUpdater.sh", appPath + "/AketsukyUpdaterTEMP.sh")
-            const { execFileSync, exec, execFile, execSync } = require('node:child_process');
-            let spawn = require("child_process").spawn;
+            const { execFileSync, exec, execFile, execSync, fork, spawn } = require('node:child_process');
             let out = fs.openSync('./out.log', 'a');
             let err = fs.openSync('./out.log', 'a');
             //powershell -command "start-process \"E:\\WorkSpaces\\Visual Studio\\AketsukyUpdater\\AketsukyUpdater\\bin\\Debug\\AketsukyUpdater.exe\" -ArgumentList \"--move-files\", \"--app=AyMusic\" "
@@ -174,15 +172,17 @@ const searchUpdates = async (event) => {
                 "--move-files",
                 "--app",
                 "electron",
+                //    "< /dev/null &> /dev/null & disown"
             ], {
-                detached: true
+                detached: true,
                 //stdio: 'ignore',
+                shell: "/bin/bash"
             });
             bat.unref()
-            setTimeout(() => {
+            /*setTimeout(() => {
                 app.exit();
-            }, 1000)
-            /*bat.stdout.on("data", (data) => {
+            }, 1000)*/
+            bat.stdout.on("data", (data) => {
                 console.log(data.toString())
             });
 
@@ -192,8 +192,9 @@ const searchUpdates = async (event) => {
 
             bat.on("exit", (code) => {
                 console.log(code)
-                
-            });*/
+                win.close()
+                //process.kill(process.pid)
+            });
             //win.close()
             /*bat.stdout.on("data", (data) => {
                 console.log(data.toString())
@@ -330,7 +331,7 @@ const searchUpdates = async (event) => {
         }*/
     }
     catch (e) {
-        console.log(e)
+        console.error(e)
         win.webContents.send('update-state-change', {
             step: -2,
             error: e,

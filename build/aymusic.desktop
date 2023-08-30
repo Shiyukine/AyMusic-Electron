@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=AyMusic
+Comment=All music platform in one
+Exec=aymusic
+Icon=com.aketsuky.aymusic
+Keywords=music;spotify;youtube;deezer;soundcloud;platform;audio
+StartupNotify=true
+Terminal=false
