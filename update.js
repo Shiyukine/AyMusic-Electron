@@ -156,60 +156,15 @@ const searchUpdates = async (event) => {
                 await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.sh")
                 /*win.webContents.send('update-state-change', {
                     step: -2,
-                    error: "Some required files are not available to update the app. ",
+                    error: "Some required files were not available when updating the app. Please retry.",
                     file: null,
                     cur: 0,
                     max: 1
                 })*/
+                await searchUpdates(event)
                 return
             }
-            fs.copyFileSync(appPath + "/AketsukyUpdater.sh", appPath + "/AketsukyUpdaterTEMP.sh")
-            const { execFileSync, exec, execFile, execSync, fork, spawn } = require('node:child_process');
-            let out = fs.openSync('./out.log', 'a');
-            let err = fs.openSync('./out.log', 'a');
-            //powershell -command "start-process \"E:\\WorkSpaces\\Visual Studio\\AketsukyUpdater\\AketsukyUpdater\\bin\\Debug\\AketsukyUpdater.exe\" -ArgumentList \"--move-files\", \"--app=AyMusic\" "
-            let bat = execFile(appPath + "/AketsukyUpdaterTEMP.sh", [
-                "--move-files",
-                "--app",
-                "electron",
-                //    "< /dev/null &> /dev/null & disown"
-            ], {
-                detached: true,
-                //stdio: 'ignore',
-                shell: "/bin/bash"
-            });
-            bat.unref()
-            /*setTimeout(() => {
-                app.exit();
-            }, 1000)*/
-            bat.stdout.on("data", (data) => {
-                console.log(data.toString())
-            });
-
-            bat.stderr.on("data", (err) => {
-                console.log(err.toString())
-            });
-
-            bat.on("exit", (code) => {
-                console.log(code)
-                win.close()
-                //process.kill(process.pid)
-            });
-            //win.close()
-            /*bat.stdout.on("data", (data) => {
-                console.log(data.toString())
-            });
-
-            bat.stderr.on("data", (err) => {
-                console.log(err.toString())
-            });
-
-            bat.on("exit", (code) => {
-                console.log(code)
-                win.close()
-            });*/
         }
-        /*
         let files = await getFiles(appPath)
         let clientJsonOut = {}
         for (let i in files) {
@@ -298,12 +253,21 @@ const searchUpdates = async (event) => {
             }
             else if (platform == "linux") {
                 fs.copyFileSync(appPath + "/AketsukyUpdater.sh", appPath + "/AketsukyUpdaterTEMP.sh")
-                let spawn = require("child_process").spawn;
-                let bat = spawn("./AketsukyUpdaterTEMP.sh", [
+                const { execFileSync, exec, execFile, execSync, fork, spawn } = require('node:child_process');
+                let out = fs.openSync('./out.log', 'a');
+                let err = fs.openSync('./out.log', 'a');
+                //powershell -command "start-process \"E:\\WorkSpaces\\Visual Studio\\AketsukyUpdater\\AketsukyUpdater\\bin\\Debug\\AketsukyUpdater.exe\" -ArgumentList \"--move-files\", \"--app=AyMusic\" "
+                let bat = spawn(appPath + "/AketsukyUpdaterTEMP.sh", [
                     "--move-files",
                     "--app",
-                    "aymusic"
-                ]);
+                    "electron",
+                    //    "< /dev/null &> /dev/null & disown"
+                ], {
+                    detached: true,
+                    //stdio: 'ignore',
+                    shell: "/bin/bash"
+                });
+                bat.unref()
                 bat.stdout.on("data", (data) => {
                     console.log(data.toString())
                 });
@@ -315,6 +279,7 @@ const searchUpdates = async (event) => {
                 bat.on("exit", (code) => {
                     console.log(code)
                     win.close()
+                    //process.kill(process.pid)
                 });
             }
             //other platforms goes here
@@ -328,7 +293,7 @@ const searchUpdates = async (event) => {
                     max: 1
                 })
             }
-        }*/
+        }
     }
     catch (e) {
         console.error(e)

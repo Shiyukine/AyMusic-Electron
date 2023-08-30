@@ -2,7 +2,7 @@ var { app } = require("electron")
 var fs = require("fs")
 
 var configLogs = { write: true }
-const logPath = app.getPath("appData") + "\\AyMusic\\latest.log"
+const logPath = app.getPath("appData") + "/AyMusic/latest.log"
 
 const addLogs = (level, message, line, sourceId) => {
     fs.appendFile(logPath, "[" + ['debug', 'info', 'warn', 'error'][level] + " @ " + sourceId + ":" + line + "] " + message + "\n", (error) => {

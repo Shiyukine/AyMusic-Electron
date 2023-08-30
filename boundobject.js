@@ -56,7 +56,7 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('get-settings', async (event, args, options) => {
-        fs.readFile(app.getPath('appData') + "\\AyMusic\\" + args, "utf-8", (error, data) => {
+        fs.readFile(app.getPath('appData') + "/AyMusic/" + args, "utf-8", (error, data) => {
             if (data) configLogs.write = JSON.parse(data)["gen_logs"]
             //console.log(writeLogs)
             event.returnValue = data
@@ -64,7 +64,7 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('write-settings', async (event, args, options) => {
-        fs.writeFile(app.getPath('appData') + "\\AyMusic\\" + args["file"], JSON.stringify(args["data"]), (error) => {
+        fs.writeFile(app.getPath('appData') + "/AyMusic/" + args["file"], JSON.stringify(args["data"]), (error) => {
             configLogs.write = args["data"]["gen_logs"]
             //console.log(writeLogs)
         });
@@ -155,8 +155,13 @@ const callBoundObject = () => {
             rpc.setActivity(args);
         }
         catch {
-            rpc.login({ clientId }).catch(console.error);
-            rpc.setActivity(args);
+            try {
+                rpc.login({ clientId }).catch(console.error);
+                rpc.setActivity(args);
+            }
+            catch (e) {
+                console.error(e)
+            }
         }
     })
 
