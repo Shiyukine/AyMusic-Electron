@@ -18,8 +18,10 @@ function mkdirp(dir) {
 
 const callBoundObject = () => {
     const rpc = new DiscordRPC.Client({ transport: 'ipc' });
-    const clientId = "1125877607817285742"
-    rpc.login({ clientId }).catch(console.error);
+    if (process.platform == "win32") {
+        const clientId = "1125877607817285742"
+        rpc.login({ clientId }).catch(console.error);
+    }
 
     ipcMain.on('set-ignore-mouse-events', (event, ignore, options) => {
         const win = BrowserWindow.fromWebContents(event.sender)
@@ -151,16 +153,18 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('discord-rpc', async (event, args, options) => {
-        try {
-            rpc.setActivity(args);
-        }
-        catch {
+        if (process.platform == "win32") {
             try {
-                rpc.login({ clientId }).catch(console.error);
                 rpc.setActivity(args);
             }
-            catch (e) {
-                console.error(e)
+            catch {
+                try {
+                    rpc.login({ clientId }).catch(console.error);
+                    rpc.setActivity(args);
+                }
+                catch (e) {
+                    console.error(e)
+                }
             }
         }
     })
