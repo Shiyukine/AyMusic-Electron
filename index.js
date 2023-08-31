@@ -6,7 +6,6 @@ var { callBoundObject, codeInjecter, clientToken } = require("./boundobject.js")
 var { initLogs, addLogs } = require("./logger.js")
 var { ElectronBlocker } = require("@cliqz/adblocker-electron");
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
-var fetch = require("cross-fetch")
 var { configUpdate } = require("./update.js")
 const isPackaged = require('electron-is-packaged').isPackaged;
 
@@ -115,7 +114,7 @@ async function createWindow() {
         }
         callback({ cancel: false, requestHeaders: details.requestHeaders })
     })
-    ElectronBlocker.fromLists(fetch, [
+    ElectronBlocker.fromLists(net.fetch, [
         'https://easylist.to/easylist/easylist.txt',
         "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
         "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
