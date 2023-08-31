@@ -10,7 +10,7 @@ var fetch = require("cross-fetch")
 var { configUpdate } = require("./update.js")
 const isPackaged = require('electron-is-packaged').isPackaged;
 
-app.setPath('userData', app.getPath("userData") + "/Cache/WebCache/");
+app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
 
 function mkdirp(dir) {
     if (fs.existsSync(dir)) { return true }
@@ -41,6 +41,7 @@ async function createWindow() {
         icon: __dirname + "/res/favicon.ico"
         //titleBarOverlay: true
     });
+    mainWindow.setMenuBarVisibility(false)
     protocol.handle('app', async (request) => {
         if (request.url.includes("app://root")) {
             const filePath = request.url.slice('app://root/'.length)
