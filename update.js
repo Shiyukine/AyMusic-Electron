@@ -18,8 +18,8 @@ async function getFiles(dir) {
 
 var configUpdate = {
     servUrl: "",
-    versionName: "0.2.1",
-    versionCode: 6,
+    versionName: "0.2.2",
+    versionCode: 7,
     isRelease: false
 }
 
@@ -255,13 +255,11 @@ const searchUpdates = async (event) => {
                 fs.copyFileSync(appPath + "/AketsukyUpdater.sh", appPath + "/AketsukyUpdaterTEMP.sh")
                 const { execFileSync, exec, execFile, execSync, fork, spawn } = require('node:child_process');
                 execSync("chmod +x \"" + appPath + "/AketsukyUpdaterTEMP.sh" + "\"");
-                let out = fs.openSync('./out.log', 'a');
-                let err = fs.openSync('./out.log', 'a');
                 //powershell -command "start-process \"E:\\WorkSpaces\\Visual Studio\\AketsukyUpdater\\AketsukyUpdater\\bin\\Debug\\AketsukyUpdater.exe\" -ArgumentList \"--move-files\", \"--app=AyMusic\" "
                 let bat = spawn(appPath + "/AketsukyUpdaterTEMP.sh", [
                     "--move-files",
                     "--app",
-                    "electron",
+                    "aymusic",
                     //    "< /dev/null &> /dev/null & disown"
                 ], {
                     detached: true,

@@ -61,6 +61,9 @@ contextBridge.exposeInMainWorld("boundobject", {
     closeWindow: () => {
         ipcRenderer.send("close-window")
     },
+    restartApp: () => {
+        ipcRenderer.send("restart-window")
+    },
     hideWindow: () => {
         ipcRenderer.send("minimize-window")
     },
