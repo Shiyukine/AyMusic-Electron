@@ -186,6 +186,7 @@ class ElectronBlocker extends adblocker_1.FiltersEngine {
                 //AyMusic code
                 delete responseHeaders['x-frame-options']
                 delete responseHeaders['content-security-policy-report-only']
+                delete responseHeaders['content-security-policy']
                 if (details.url.includes("spotify.com") || details.url.includes("www.google.com") || details.url.includes("consent.google.com")) {
                     for (let i in responseHeaders["set-cookie"]) {
                         if (responseHeaders["set-cookie"][i].includes("SameSite=Lax")) {
@@ -195,7 +196,6 @@ class ElectronBlocker extends adblocker_1.FiltersEngine {
                             responseHeaders["set-cookie"][i] += "; SameSite=None"
                         }
                     }
-                    delete responseHeaders['content-security-policy']
                 }
                 if (details.url.includes("youtube.com")) {
                     const frame = details.frame
