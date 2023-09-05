@@ -1,4 +1,4 @@
-const { app, components, BrowserWindow, session, protocol, net, webFrameMain } = require('electron');
+const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents } = require('electron');
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
@@ -10,6 +10,7 @@ var { configUpdate } = require("./update.js")
 const isPackaged = require('electron-is-packaged').isPackaged;
 
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
+app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
 
 function mkdirp(dir) {
     if (fs.existsSync(dir)) { return true }
@@ -37,7 +38,7 @@ async function createWindow() {
             sandbox: false, //security risks ??
             preload: path.join(__dirname, "preload.js"),
         },
-        icon: __dirname + "/res/favicon.ico"
+        icon: __dirname + "/res/favicon.ico",
         //titleBarOverlay: true
     });
     mainWindow.setMenuBarVisibility(false)
@@ -86,12 +87,14 @@ async function createWindow() {
             })
         }
     })
+    //mainWindow.webContents.userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
     mainWindow.loadURL("app://root/index.html"/*, { userAgent: "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36" }*/);
     mainWindow.webContents.on(
         'did-frame-navigate',
         (event, url, httpResponseCode, httpStatusText, isMainFrame, frameProcessId, frameRoutingId) => {
             const frame = webFrameMain.fromId(frameProcessId, frameRoutingId)
             if (frame) {
+                //webContents.fromFrame(frame).userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
                 for (let i in codeInjecter) {
                     if (encodeURI(decodeURIComponent(frame.url)).includes(encodeURI(decodeURIComponent(codeInjecter[i]["url"])))) {
                         const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].split("'").join("\\'") + "')"

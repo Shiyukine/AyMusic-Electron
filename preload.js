@@ -88,8 +88,8 @@ contextBridge.exposeInMainWorld("boundobject", {
     saveData: (fileName, bytes) => {
         ipcRenderer.send("save-data", { fileName: fileName, bytes: bytes })
     },
-    openWebsiteInNewWindow: (baseUrl, closeUrl = undefined) => {
-        ipcRenderer.send("open-website", { baseUrl: baseUrl, closeUrl: closeUrl })
+    openWebsiteInNewWindow: (baseUrl, closeUrl = undefined, useIncludeUrlFilter = true) => {
+        ipcRenderer.send("open-website", { baseUrl: baseUrl, closeUrl: closeUrl, useIncludeUrlFilter: useIncludeUrlFilter })
     },
     getClientToken: (key) => {
         return ipcRenderer.sendSync("client-token", key)

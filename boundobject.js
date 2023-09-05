@@ -107,6 +107,7 @@ const callBoundObject = () => {
     ipcMain.on('open-website', async (event, args, options) => {
         var baseUrl = args["baseUrl"]
         var closeUrl = args["closeUrl"]
+        var filter = args["useIncludeUrlFilter"]
         const win = new BrowserWindow({
             width: 800,
             height: 600,
@@ -114,7 +115,9 @@ const callBoundObject = () => {
             //titleBarOverlay: true
         });
         win.webContents.on("did-navigate", (event, url, httpResponseCode, httpStatusText) => {
-            if (url.includes(closeUrl)) {
+            let cond = url.includes(closeUrl)
+            if (!filter) cond = url == closeUrl
+            if (cond) {
                 win.close()
             }
         })
