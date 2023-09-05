@@ -49,12 +49,10 @@ else
         #(set -m; $newstr$app &)
         #$newstr$app
         #$SHELL
-        #$newstr$app < /dev/null &> /dev/null & disown
+        $newstr$app < /dev/null &> /dev/null & disown || $newstr$app --no-sandbox --no-zygote < /dev/null &> /dev/null & disown
         #gnome-terminal echo
         #gnome-terminal -- bash -c "echo {$app}; $SHELL"
-    	#exit 0
-	$newstr$app 
-	#exit 0
+    	exit 0
         #./electron
     fi
 fi

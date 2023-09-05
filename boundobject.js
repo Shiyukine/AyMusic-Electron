@@ -33,6 +33,10 @@ const callBoundObject = () => {
         win.close()
     })
 
+    ipcMain.on('restart-window', (event, ignore, options) => {
+        app.relaunch()
+    })
+
     ipcMain.on('change-serv', (event, args, options) => {
         configUpdate.servUrl = args
     })

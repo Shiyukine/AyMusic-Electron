@@ -182,6 +182,11 @@ async function createWindow() {
             }
         }, 100)
         app.registerClient('` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject,` + isPackaged + `)`)
+        process.argv.forEach((val, index) => {
+            if (val == "--no-sandbox") {
+                mainWindow.webContents.executeJavaScript("window.forceRestart = true")
+            }
+        });
     });
     mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
         //console.log('renderer console.%s: %s', ['debug', 'info', 'warn', 'error'][level], message);
