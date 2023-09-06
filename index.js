@@ -105,7 +105,8 @@ async function createWindow() {
         }
     )
     session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-        if (!details.url.includes("accounts.google.com"))
+        let ref = details.requestHeaders["Referer"]
+        if (!details.url.includes("accounts.google.com") || ref == "https://www.deezer.com/")
             details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
         else
             details.requestHeaders['User-Agent'] = "Chrome"
