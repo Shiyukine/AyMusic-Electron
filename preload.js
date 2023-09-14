@@ -110,5 +110,8 @@ contextBridge.exposeInMainWorld("boundobject", {
     },
     searchUpdates: () => {
         ipcRenderer.send("search-updates")
+    },
+    haveCookie: (url, name) => {
+        return ipcRenderer.sendSync("have-cookie", { url: url, name: name })
     }
 });

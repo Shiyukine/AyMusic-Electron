@@ -69,6 +69,15 @@ const callBoundObject = () => {
         });
     })
 
+    ipcMain.on('have-cookie', (event, args, options) => {
+        session.defaultSession.cookies.get({ domain: args["url"], name: args["name"] })
+            .then((cookies) => {
+                event.returnValue = cookies
+            }).catch((error) => {
+                console.log(error)
+            })
+    })
+
     ipcMain.on('write-settings', async (event, args, options) => {
         fs.writeFile(app.getPath('appData') + "/AyMusic/" + args["file"], JSON.stringify(args["data"]), (error) => {
             configLogs.write = args["data"]["gen_logs"]
