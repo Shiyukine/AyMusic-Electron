@@ -26,11 +26,11 @@ contextBridge.exposeInMainWorld("boundobject", {
             data: JSON.parse(newSettings)
         })
     },
-    httpRequestGET: async (url) => {
-        return ipcRenderer.sendSync("custom-fetch", { url: url, config: undefined })
+    httpRequestGET: (url) => {
+        return ipcRenderer.invoke("custom-fetch", { url: url, config: undefined })
     },
-    httpRequestPOST: async (url, json) => {
-        return ipcRenderer.sendSync("custom-fetch", {
+    httpRequestPOST: (url, json) => {
+        return ipcRenderer.invoke("custom-fetch", {
             url: url,
             config: {
                 method: "POST",

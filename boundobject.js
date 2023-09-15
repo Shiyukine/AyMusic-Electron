@@ -70,7 +70,7 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('have-cookie', (event, args, options) => {
-        session.defaultSession.cookies.get({ domain: args["url"], name: args["name"] })
+        session.defaultSession.cookies.get({ url: args["url"], name: args["name"] })
             .then((cookies) => {
                 event.returnValue = cookies
             }).catch((error) => {
@@ -107,13 +107,13 @@ const callBoundObject = () => {
         })
     })
 
-    ipcMain.on('custom-fetch', async (event, args, options) => {
+    ipcMain.handle('custom-fetch', async (event, args, options) => {
         try {
-            event.returnValue = await (await net.fetch(args["url"] + (args["url"].includes("?") ? "&" : "?") + "date=" + Date.now(), args["config"])).text()
+            return await (await net.fetch(args["url"] + (args["url"].includes("?") ? "&" : "?") + "date=" + Date.now(), args["config"])).text()
         }
         catch (e) {
             console.error(e)
-            event.returnValue = e + ""
+            return e + ""
         }
     })
 
