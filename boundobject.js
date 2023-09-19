@@ -142,18 +142,22 @@ const callBoundObject = () => {
         win.loadURL(baseUrl/*, { userAgent: 'Chrome' }*/)
     })
 
-    ipcMain.on('save-cache', async (event, args, options) => {
-        var url = app.getPath('appData') + "/AyMusic/Cache/" + args["fileName"]
-        mkdirp(path.dirname(url))
-        fs.appendFileSync(url, "")
-        fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { })
+    ipcMain.handle('save-cache', async (event, args, options) => {
+        return new Promise(r => {
+            var url = app.getPath('appData') + "/AyMusic/Cache/" + args["fileName"]
+            mkdirp(path.dirname(url))
+            fs.appendFileSync(url, "")
+            fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { r(err) })
+        })
     })
 
-    ipcMain.on('save-data', async (event, args, options) => {
-        var url = app.getPath('appData') + "/AyMusic/Data/" + args["fileName"]
-        mkdirp(path.dirname(url))
-        fs.appendFileSync(url, "")
-        fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { })
+    ipcMain.handle('save-data', async (event, args, options) => {
+        return new Promise(r => {
+            var url = app.getPath('appData') + "/AyMusic/Data/" + args["fileName"]
+            mkdirp(path.dirname(url))
+            fs.appendFileSync(url, "")
+            fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { r(err) })
+        })
     })
 
     ipcMain.on('client-token', async (event, args, options) => {

@@ -86,10 +86,10 @@ contextBridge.exposeInMainWorld("boundobject", {
         return ipcRenderer.sendSync("show-dialog")
     },
     saveCache: (fileName, bytes) => {
-        ipcRenderer.send("save-cache", { fileName: fileName, bytes: bytes })
+        return ipcRenderer.invoke("save-cache", { fileName: fileName, bytes: bytes })
     },
     saveData: (fileName, bytes) => {
-        ipcRenderer.send("save-data", { fileName: fileName, bytes: bytes })
+        return ipcRenderer.invoke("save-data", { fileName: fileName, bytes: bytes })
     },
     openWebsiteInNewWindow: (baseUrl, closeUrl = undefined, useIncludeUrlFilter = true) => {
         ipcRenderer.send("open-website", { baseUrl: baseUrl, closeUrl: closeUrl, useIncludeUrlFilter: useIncludeUrlFilter })
