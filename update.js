@@ -231,13 +231,13 @@ const searchUpdates = async (event) => {
             if (platform == "windows") {
                 fs.copyFileSync(appPath + "/AketsukyUpdater.exe", appPath + "/AketsukyUpdaterTEMP.exe")
                 let spawn = require("child_process").spawn;
-                //powershell -command "start-process \"E:\\WorkSpaces\\Visual Studio\\AketsukyUpdater\\AketsukyUpdater\\bin\\Debug\\AketsukyUpdater.exe\" -ArgumentList \"--move-files\", \"--app=AyMusic\" "
-                let cmd = "start-process \"" + appPath.split("\\").join("\\\\") + "\\\\AketsukyUpdaterTEMP.exe\" -ArgumentList \"--move-files\", \"--app=AyMusic\""
-                console.log(cmd)
-                let bat = spawn("powershell", [
-                    "-command",
-                    cmd,
-                ]);
+                let bat = spawn(appPath + "/AketsukyUpdaterTEMP.exe", [
+                    "--move-files",
+                    "--app=AyMusic",
+                ], {
+                    detached: true
+                });
+                bat.unref()
                 bat.stdout.on("data", (data) => {
                     console.log(data.toString())
                 });
