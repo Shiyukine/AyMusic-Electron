@@ -234,11 +234,12 @@ const searchUpdates = async (event) => {
                 let bat = spawn(appPath + "/AketsukyUpdaterTEMP.exe", [
                     "--move-files",
                     "--app=AyMusic",
+                    "--ver-update=1"
                 ], {
                     detached: true
                 });
                 bat.unref()
-                bat.stdout.on("data", (data) => {
+                /*bat.stdout.on("data", (data) => {
                     console.log(data.toString())
                 });
 
@@ -248,8 +249,9 @@ const searchUpdates = async (event) => {
 
                 bat.on("exit", (code) => {
                     console.log(code)
-                    win.close()
-                });
+                    
+                });*/
+                win.close()
             }
             else if (platform == "linux") {
                 fs.copyFileSync(appPath + "/AketsukyUpdater.sh", appPath + "/AketsukyUpdaterTEMP.sh")
