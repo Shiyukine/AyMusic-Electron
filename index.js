@@ -12,6 +12,15 @@ const isPackaged = require('electron-is-packaged').isPackaged;
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
 app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
 
+var maximize = false
+try {
+    let settings = fs.readFileSync(app.getPath('appData') + "/AyMusic/UserSettings.json", "utf-8")
+    settings = JSON.parse(settings)
+    if (settings["other_hwacc"] === false) app.disableHardwareAcceleration();
+    if (settings["other_maximize"] === true) maximize = true
+}
+catch { }
+
 function mkdirp(dir) {
     if (fs.existsSync(dir)) { return true }
     const dirname = path.dirname(dir)
@@ -41,6 +50,19 @@ async function createWindow() {
         icon: __dirname + "/res/favicon.ico",
         //titleBarOverlay: true
     });
+    if (maximize) mainWindow.maximize()
+    mainWindow.on("maximize", (event, isAlwaysOnTop) => {
+        let settings = fs.readFileSync(app.getPath('appData') + "/AyMusic/UserSettings.json", "utf-8")
+        settings = JSON.parse(settings)
+        settings["other_maximize"] = true
+        fs.writeFile(app.getPath('appData') + "/AyMusic/UserSettings.json", JSON.stringify(settings), (error) => { });
+    })
+    mainWindow.on("unmaximize", (event) => {
+        let settings = fs.readFileSync(app.getPath('appData') + "/AyMusic/UserSettings.json", "utf-8")
+        settings = JSON.parse(settings)
+        settings["other_maximize"] = false
+        fs.writeFile(app.getPath('appData') + "/AyMusic/UserSettings.json", JSON.stringify(settings), (error) => { });
+    })
     mainWindow.setMenuBarVisibility(false)
     protocol.handle('app', async (request) => {
         if (request.url.includes("app://root")) {
