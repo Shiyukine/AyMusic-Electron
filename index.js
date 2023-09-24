@@ -151,39 +151,42 @@ async function createWindow() {
     ]).then(blocker => {
         blocker.enableBlockingInSession(session.defaultSession);
     });
+    session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
+        const responseHeaders = details.responseHeaders || {};
+        if (!responseHeaders["Access-Control-Allow-Credentials".toLowerCase()]) {
+            for (let i in responseHeaders) {
+                if (i.toLowerCase() == "access-control-allow-origin") delete responseHeaders[i]
+            }
+            responseHeaders["access-control-allow-origin"] = "*"
+        }
+        //AyMusic code
+        delete responseHeaders['x-frame-options']
+        delete responseHeaders['content-security-policy-report-only']
+        delete responseHeaders['content-security-policy']
+        if (details.url.includes("spotify.com") || details.url.includes("www.google.com") || details.url.includes("consent.google.com")) {
+            for (let i in responseHeaders["set-cookie"]) {
+                if (responseHeaders["set-cookie"][i].includes("SameSite=Lax")) {
+                    responseHeaders["set-cookie"][i] = responseHeaders["set-cookie"][i].split("SameSite=Lax").join("SameSite=None; Secure")
+                }
+                else {
+                    responseHeaders["set-cookie"][i] += "; SameSite=None"
+                }
+            }
+        }
+        if (details.url.includes("youtube.com")) {
+            const frame = details.frame
+            if (frame) {
+                for (let i in codeInjecter) {
+                    if (encodeURI(decodeURI(frame.url)).includes(codeInjecter[i]["url"])) {
+                        const code = "if(typeof intytb == 'undefined') { let intytb = setInterval(() => { if(typeof scriptLoad == 'undefined') { try { document.getElementsByTagName('video')[0].pause(); } catch(e) {  } } else { clearInterval(intytb); } }, 1) }"
+                        frame.executeJavaScript(code)
+                    }
+                }
+            }
+        }
+        callback({ responseHeaders });
+    })
     mainWindow.webContents.on('dom-ready', async (e) => {
-        /*session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
-            delete details.responseHeaders['x-frame-options']
-            delete details.responseHeaders['content-security-policy-report-only']
-            if (details.url.includes("spotify.com")) {
-                for (let i in details.responseHeaders["set-cookie"]) {
-                    if (details.responseHeaders["set-cookie"][i].includes("SameSite=Lax")) {
-                        details.responseHeaders["set-cookie"][i] = details.responseHeaders["set-cookie"][i].split("SameSite=Lax").join("SameSite=None; Secure")
-                    }
-                    else {
-                        details.responseHeaders["set-cookie"][i] += "; SameSite=None"
-                    }
-                }
-                details.responseHeaders["access-control-allow-origin"] = "*"
-                delete details.responseHeaders['content-security-policy']
-            }
-            if (details.url.includes("youtube.com")) {
-                const frame = details.frame
-                if (frame) {
-                    for (let i in codeInjecter) {
-                        if (encodeURI(decodeURI(frame.url)).includes(codeInjecter[i]["url"])) {
-                            const code = "if(typeof intytb == 'undefined') { let intytb = setInterval(() => { if(typeof scriptLoad == 'undefined') { try { document.getElementsByTagName('video')[0].pause(); } catch(e) {  } } else { clearInterval(intytb); } }, 1) }"
-                            frame.executeJavaScript(code)
-                        }
-                    }
-                }
-            }
-            callback({ cancel: false, responseHeaders: details.responseHeaders })
-        })*/
-        /*var anBlockerHeaders = blocker.onHeadersReceived
-        blocker.onHeadersReceived = (details, callback) => {
-            anBlockerHeaders(details, callback)
-        }*/
         var platform = process.platform
         if (platform == "darwin") platform = "MacOS"
         if (platform == "win32") platform = "Windows"
