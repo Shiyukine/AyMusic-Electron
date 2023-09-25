@@ -91,6 +91,12 @@ contextBridge.exposeInMainWorld("boundobject", {
     saveData: (fileName, bytes) => {
         return ipcRenderer.invoke("save-data", { fileName: fileName, bytes: bytes })
     },
+    removeCache: (fileName) => {
+        return ipcRenderer.invoke("remove-cache", { fileName: fileName })
+    },
+    removeData: (fileName) => {
+        return ipcRenderer.invoke("remove-data", { fileName: fileName })
+    },
     openWebsiteInNewWindow: (baseUrl, closeUrl = undefined, useIncludeUrlFilter = true) => {
         ipcRenderer.send("open-website", { baseUrl: baseUrl, closeUrl: closeUrl, useIncludeUrlFilter: useIncludeUrlFilter })
     },

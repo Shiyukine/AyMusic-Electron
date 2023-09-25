@@ -160,6 +160,20 @@ const callBoundObject = () => {
         })
     })
 
+    ipcMain.handle('remove-cache', async (event, args, options) => {
+        return new Promise(r => {
+            var url = app.getPath('appData') + "/AyMusic/Cache/" + args["fileName"]
+            fs.rm(url, { recursive: true, force: true }, function (err) { r(err) })
+        })
+    })
+
+    ipcMain.handle('remove-data', async (event, args, options) => {
+        return new Promise(r => {
+            var url = app.getPath('appData') + "/AyMusic/Data/" + args["fileName"]
+            fs.rm(url, { recursive: true, force: true }, function (err) { r(err) })
+        })
+    })
+
     ipcMain.on('client-token', async (event, args, options) => {
         event.returnValue = clientToken[args]
     })
