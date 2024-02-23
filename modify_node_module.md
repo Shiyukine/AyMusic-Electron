@@ -181,7 +181,7 @@ class ElectronBlocker extends adblocker_1.FiltersEngine {
                 }
                 responseHeaders["access-control-allow-origin"] = "*"
             }
-            if (details.resourceType === 'mainFrame' || details.resourceType === 'subFrame') {
+            if (details.resourceType === 'mainFrame' || details.resourceType === 'subFrame' || (details.url.includes("deezer.com") && details.resourceType === 'xhr')) {
                 const rawCSP = this.getCSPDirectives(fromElectronDetails(details));
                 //AyMusic code
                 delete responseHeaders['x-frame-options']

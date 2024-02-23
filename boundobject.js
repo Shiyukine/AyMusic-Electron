@@ -62,11 +62,16 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('get-settings', async (event, args, options) => {
-        fs.readFile(app.getPath('appData') + "/AyMusic/" + args, "utf-8", (error, data) => {
-            if (data) configLogs.write = JSON.parse(data)["gen_logs"]
-            //console.log(writeLogs)
-            event.returnValue = data
-        });
+        const relativePath = args
+        const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)
+        if (args.includes("AllowPaths") || !isSafe) event.returnValue = "{}"
+        else {
+            fs.readFile(app.getPath('appData') + "/AyMusic/" + args, "utf-8", (error, data) => {
+                if (data) configLogs.write = JSON.parse(data)["gen_logs"]
+                //console.log(writeLogs)
+                event.returnValue = data
+            });
+        }
     })
 
     ipcMain.on('have-cookie', (event, args, options) => {
@@ -79,10 +84,14 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('write-settings', async (event, args, options) => {
-        fs.writeFile(app.getPath('appData') + "/AyMusic/" + args["file"], JSON.stringify(args["data"]), (error) => {
-            configLogs.write = args["data"]["gen_logs"]
-            //console.log(writeLogs)
-        });
+        const relativePath = args["file"]
+        const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)
+        if (!args["file"].includes("AllowPaths") && isSafe) {
+            fs.writeFile(app.getPath('appData') + "/AyMusic/" + args["file"], JSON.stringify(args["data"]), (error) => {
+                configLogs.write = args["data"]["gen_logs"]
+                //console.log(writeLogs)
+            });
+        }
     })
 
     ipcMain.on('register-frame-url', async (event, args, options) => {
@@ -96,8 +105,14 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('show-dialog', (event, ignore, options) => {
+        let settings = "{}"
+        try {
+            settings = fs.readFileSync(app.getPath('appData') + "/AyMusic/AllowPaths.json", "utf-8")
+        }
+        catch { }
+        settings = JSON.parse(settings)
         const win = BrowserWindow.fromWebContents(event.sender)
-        event.returnValue = dialog.showOpenDialogSync(win, {
+        let retVal = dialog.showOpenDialogSync(win, {
             title: "AyMusic",
             filters: [
                 { name: 'Music', extensions: ['mp3', "wav", "flac", "ogg", "aac"] },
@@ -105,6 +120,19 @@ const callBoundObject = () => {
             ],
             properties: ["openFile", "multiSelections"]
         })
+        let newPath = []
+        if (typeof retVal !== "undefined") {
+            for (let valpath of retVal) {
+                let rdm = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2) + path.extname(valpath)
+                settings[rdm] = valpath
+                newPath.push(rdm)
+                fs.writeFile(app.getPath('appData') + "/AyMusic/AllowPaths.json", JSON.stringify(settings), (error) => { });
+            }
+            event.returnValue = newPath
+        }
+        else {
+            event.returnValue = retVal
+        }
     })
 
     ipcMain.handle('custom-fetch', async (event, args, options) => {

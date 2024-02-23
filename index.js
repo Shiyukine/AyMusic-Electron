@@ -70,9 +70,11 @@ async function createWindow() {
             return net.fetch(url.pathToFileURL(path.join(__dirname, "res", filePath)).toString())
         }
         if (request.url.includes("app://localfiles")) {
+            let settings = fs.readFileSync(app.getPath('appData') + "/AyMusic/AllowPaths.json", "utf-8")
+            settings = JSON.parse(settings)
             const filePath = request.url.slice('app://localfiles/'.length)
             //return net.fetch("file://" + filePath)
-            var file = await net.fetch("file://" + filePath, {
+            var file = await net.fetch("file://" + settings[filePath], {
                 headers: request.headers
             })
             var fileContent = await file.arrayBuffer()
@@ -83,6 +85,14 @@ async function createWindow() {
             })
         }
         if (request.url.includes("app://cache")) {
+            const relativePath = request.url.slice('app://cache/'.length)
+            const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)
+            if (!isSafe) {
+                return new Response('bad', {
+                    status: 400,
+                    headers: { 'content-type': 'text/html' }
+                })
+            }
             const filePath = app.getPath("appData") + "/AyMusic/Cache/" + request.url.slice('app://cache/'.length)
             //return net.fetch("file://" + filePath)
             var file = await net.fetch("file://" + filePath, {
@@ -96,6 +106,14 @@ async function createWindow() {
             })
         }
         if (request.url.includes("app://data")) {
+            const relativePath = request.url.slice('app://cache/'.length)
+            const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)
+            if (!isSafe) {
+                return new Response('bad', {
+                    status: 400,
+                    headers: { 'content-type': 'text/html' }
+                })
+            }
             const filePath = app.getPath("appData") + "/AyMusic/Data/" + request.url.slice('app://data/'.length)
             //return net.fetch("file://" + filePath)
             var file = await net.fetch("file://" + filePath, {
