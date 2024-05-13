@@ -1,2 +1,11 @@
-node_modules
-dist
+/dist
+node_modules/*
+!node_modules/@cliqz
+node_modules/@cliqz/*
+!node_modules/@cliqz/adblocker-electron/
+node_modules/@cliqz/adblocker-electron/*
+!node_modules/@cliqz/adblocker-electron/dist
+node_modules/@cliqz/adblocker-electron/dist/*
+!node_modules/@cliqz/adblocker-electron/dist/cjs
+node_modules/@cliqz/adblocker-electron/dist/cjs/*
+!node_modules/@cliqz/adblocker-electron/dist/cjs/adblocker.js
