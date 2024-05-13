@@ -156,6 +156,11 @@ async function createWindow() {
                 clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
             }
         }
+        if (details.url.includes("secure.soundcloud.com")) {
+            console.log(details.url)
+            let uri = new URL(details.url)
+            clientToken["Soundcloud"] = uri.searchParams.get("client_id")
+        }
         callback({ cancel: false, requestHeaders: details.requestHeaders })
     })
     ElectronBlocker.fromLists(net.fetch, [
@@ -236,6 +241,18 @@ async function createWindow() {
         //console.log('renderer console.%s: %s', ['debug', 'info', 'warn', 'error'][level], message);
         addLogs(level, message, line, sourceId)
     });
+    let dontClose = true
+    mainWindow.on("close", async (e) => {
+        if (dontClose) {
+            e.preventDefault()
+            dontClose = false
+            console.log(await mainWindow.webContents.executeJavaScript("window.listeners.player.disconnect()"))
+            mainWindow.close();
+        }
+    })
+    mainWindow.on("session-end", async (e) => {
+        console.log(await mainWindow.webContents.executeJavaScript("window.listeners.player.disconnect()"))
+    })
 }
 
 protocol.registerSchemesAsPrivileged([
