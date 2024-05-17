@@ -52,16 +52,10 @@ async function createWindow() {
     });
     if (maximize) mainWindow.maximize()
     mainWindow.on("maximize", (event, isAlwaysOnTop) => {
-        let settings = fs.readFileSync(app.getPath('appData') + "/AyMusic/UserSettings.json", "utf-8")
-        settings = JSON.parse(settings)
-        settings["other_maximize"] = true
-        fs.writeFile(app.getPath('appData') + "/AyMusic/UserSettings.json", JSON.stringify(settings), (error) => { });
+        mainWindow.webContents.executeJavaScript("window.app.recieveEventClient('maximize')")
     })
     mainWindow.on("unmaximize", (event) => {
-        let settings = fs.readFileSync(app.getPath('appData') + "/AyMusic/UserSettings.json", "utf-8")
-        settings = JSON.parse(settings)
-        settings["other_maximize"] = false
-        fs.writeFile(app.getPath('appData') + "/AyMusic/UserSettings.json", JSON.stringify(settings), (error) => { });
+        mainWindow.webContents.executeJavaScript("window.app.recieveEventClient('unmaximize')")
     })
     mainWindow.setMenuBarVisibility(false)
     protocol.handle('app', async (request) => {
