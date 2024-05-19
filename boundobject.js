@@ -105,12 +105,12 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('show-dialog', (event, ignore, options) => {
-        let settings = "{}"
+        let settings = {}
         try {
             settings = fs.readFileSync(app.getPath('appData') + "/AyMusic/AllowPaths.json", "utf-8")
+            settings = JSON.parse(settings)
         }
         catch { }
-        settings = JSON.parse(settings)
         const win = BrowserWindow.fromWebContents(event.sender)
         let retVal = dialog.showOpenDialogSync(win, {
             title: "AyMusic",
