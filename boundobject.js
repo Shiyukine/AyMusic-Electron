@@ -125,9 +125,9 @@ const callBoundObject = () => {
             for (let valpath of retVal) {
                 let rdm = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2) + path.extname(valpath)
                 settings[rdm] = valpath
-                newPath.push(rdm)
-                fs.writeFile(app.getPath('appData') + "/AyMusic/AllowPaths.json", JSON.stringify(settings), (error) => { });
+                newPath.push([rdm, path.basename(valpath)])
             }
+            fs.writeFile(app.getPath('appData') + "/AyMusic/AllowPaths.json", JSON.stringify(settings), (error) => { });
             event.returnValue = newPath
         }
         else {
@@ -175,7 +175,9 @@ const callBoundObject = () => {
             var url = app.getPath('appData') + "/AyMusic/Cache/" + args["fileName"]
             mkdirp(path.dirname(url))
             fs.appendFileSync(url, "")
-            fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { r(err) })
+            if (args["bytes"]) {
+                fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { r(err) })
+            }
         })
     })
 
@@ -184,7 +186,9 @@ const callBoundObject = () => {
             var url = app.getPath('appData') + "/AyMusic/Data/" + args["fileName"]
             mkdirp(path.dirname(url))
             fs.appendFileSync(url, "")
-            fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { r(err) })
+            if (args["bytes"]) {
+                fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { r(err) })
+            }
         })
     })
 
