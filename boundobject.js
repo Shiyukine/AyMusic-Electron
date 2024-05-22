@@ -123,7 +123,14 @@ const callBoundObject = () => {
         let newPath = []
         if (typeof retVal !== "undefined") {
             for (let valpath of retVal) {
-                let rdm = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2) + path.extname(valpath)
+                let settingsRdm = undefined
+                for (let key in settings) {
+                    if (settings[key] == valpath) {
+                        settingsRdm = key
+                        break
+                    }
+                }
+                let rdm = typeof settingsRdm !== "undefined" ? settingsRdm : (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2) + path.extname(valpath)
                 settings[rdm] = valpath
                 newPath.push([rdm, path.basename(valpath)])
             }
