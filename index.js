@@ -129,12 +129,15 @@ async function createWindow() {
             const frame = webFrameMain.fromId(frameProcessId, frameRoutingId)
             if (frame) {
                 //webContents.fromFrame(frame).userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
+                let toRemove = []
                 for (let i in codeInjecter) {
                     if (encodeURI(decodeURIComponent(frame.url)).includes(encodeURI(decodeURIComponent(codeInjecter[i]["url"])))) {
-                        const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].split("'").join("\\'") + "')"
+                        const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].split("'").join("\\'") + " \\nactual url: ' + window.location.href)"
                         frame.executeJavaScript(code)
+                        toRemove.push(i)
                     }
                 }
+                for (let i of toRemove) codeInjecter.splice(i, 1)
             }
         }
     )
@@ -150,9 +153,9 @@ async function createWindow() {
                 clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
             }
         }
-        if (details.url.includes("secure.soundcloud.com")) {
-            console.log(details.url)
+        if (details.url.includes("https://api-auth.soundcloud.com/oauth/authorize")) {
             let uri = new URL(details.url)
+            console.log(details.url, uri.searchParams.get("client_id"))
             clientToken["Soundcloud"] = uri.searchParams.get("client_id")
         }
         callback({ cancel: false, requestHeaders: details.requestHeaders })
