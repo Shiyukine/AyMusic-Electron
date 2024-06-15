@@ -20,7 +20,8 @@ var configUpdate = {
     servUrl: "",
     versionName: "0.3.0",
     versionCode: 7,
-    isRelease: false
+    isRelease: false,
+    closing: false
 }
 
 function getChecksum(path) {
@@ -48,6 +49,7 @@ function mkdirp(dir) {
 function dlFile(win, appPath, dlPathServ, platform, file) {
     return new Promise(async resolve => {
         try {
+            console.log(dlPathServ.split("%platform%").join(platform).split("%file%").join(file))
             mkdirp(appPath + "/DownloadTemp/" + file.split("/").slice(0, -1).join("/") + "/")
             let dl = await electronDl.download(win, dlPathServ.split("%platform%").join(platform).split("%file%").join(file), {
                 directory: appPath + "/DownloadTemp/" + file.split("/").slice(0, -1).join("/") + "/",
@@ -78,8 +80,9 @@ function dlFile(win, appPath, dlPathServ, platform, file) {
 }
 
 function dlFileNotTemp(win, appPath, dlPathServ, platform, file) {
-    return new Promise(async resolve => {
+    return new Promise(async (resolve, reject) => {
         try {
+            console.log(dlPathServ.split("%platform%").join(platform).split("%file%").join(file))
             let dl = await electronDl.download(win, dlPathServ.split("%platform%").join(platform).split("%file%").join(file), {
                 directory: appPath + file.split("/").slice(0, -1).join("/") + "/",
                 onCompleted: (e) => {
@@ -96,8 +99,19 @@ function dlFileNotTemp(win, appPath, dlPathServ, platform, file) {
                 cur: 0,
                 max: 1
             })
+            console.error(e)
+            reject(e)
         }
     })
+}
+
+let alreadyFixPerm = false
+
+function fixPerm(appPath) {
+    console.log(appPath)
+    if (alreadyFixPerm) return
+    require("child_process").execSync("pkexec chown -R \"$USER\":\"$USER\" \"" + appPath + "\"");
+    alreadyFixPerm = true
 }
 
 const searchUpdates = async (event) => {
@@ -123,7 +137,7 @@ const searchUpdates = async (event) => {
             max: 100
         })
         if (out) out = JSON.parse(out)
-        let dlPathServ = out["***INFOS***"]
+        let dlPathServ = configUpdate.servUrl.split("https://").join("https://files.") + "dl/AyMusic/Updates/%platform%/%file%"
         let servJsonOut = {}
         for (let f in out) {
             if (f != "***INFOS***") servJsonOut[f] = out[f]
@@ -151,12 +165,16 @@ const searchUpdates = async (event) => {
         }
         if (platform == "linux") {
             appPath = path.dirname(app.getPath("exe"))
-            if (fs.existsSync(appPath + "/AketsukyUpdaterTEMP.sh")) fs.rmSync(appPath + "/AketsukyUpdaterTEMP.sh")
+            if (fs.existsSync(appPath + "/AketsukyUpdaterTEMP.sh")) {
+                fixPerm(appPath)
+                fs.rmSync(appPath + "/AketsukyUpdaterTEMP.sh")
+            }
             if (!fs.existsSync(appPath + "/AketsukyUpdater.sh") && configUpdate.isRelease) {
+                fixPerm(appPath)
                 await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.sh")
                 /*win.webContents.send('update-state-change', {
                     step: -2,
-                    error: "Some required files were not available when updating the app. Please retry.",
+                    error: "Some required files are not available to update the app. Please resintall this app.",
                     file: null,
                     cur: 0,
                     max: 1
@@ -211,6 +229,7 @@ const searchUpdates = async (event) => {
             })
         }
         else {
+            fixPerm(appPath);
             for (let i in filesToUpdate) {
                 let file = filesToUpdate[i]
                 mkdirp(appPath + "/DownloadTemp/")
@@ -251,6 +270,7 @@ const searchUpdates = async (event) => {
                     console.log(code)
                     
                 });*/
+                configUpdate.closing = true
                 win.close()
             }
             else if (platform == "linux") {
@@ -279,6 +299,7 @@ const searchUpdates = async (event) => {
 
                 bat.on("exit", (code) => {
                     console.log(code)
+                    configUpdate.closing = true
                     win.close()
                     //process.kill(process.pid)
                 });

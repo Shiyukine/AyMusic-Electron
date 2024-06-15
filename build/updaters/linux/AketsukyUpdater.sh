@@ -49,6 +49,7 @@ else
         #(set -m; $newstr$app &)
         #$newstr$app
         #$SHELL
+        pkexec chown -R root:root $newstr
         $newstr$app < /dev/null &> /dev/null & disown || $newstr$app --no-sandbox --no-zygote < /dev/null &> /dev/null & disown
         #gnome-terminal echo
         #gnome-terminal -- bash -c "echo {$app}; $SHELL"

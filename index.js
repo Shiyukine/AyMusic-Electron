@@ -237,7 +237,7 @@ async function createWindow() {
     });
     let dontClose = true
     mainWindow.on("close", async (e) => {
-        if (dontClose) {
+        if (dontClose && !configUpdate.closing) {
             e.preventDefault()
             dontClose = false
             console.log(await mainWindow.webContents.executeJavaScript("window.listeners.player.disconnect()"))
