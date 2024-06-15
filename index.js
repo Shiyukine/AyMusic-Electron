@@ -129,15 +129,12 @@ async function createWindow() {
             const frame = webFrameMain.fromId(frameProcessId, frameRoutingId)
             if (frame) {
                 //webContents.fromFrame(frame).userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.106 Safari/537.36"
-                let toRemove = []
                 for (let i in codeInjecter) {
                     if (encodeURI(decodeURIComponent(frame.url)).includes(encodeURI(decodeURIComponent(codeInjecter[i]["url"])))) {
                         const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].split("'").join("\\'") + " \\nactual url: ' + window.location.href)"
                         frame.executeJavaScript(code)
-                        toRemove.push(i)
                     }
                 }
-                for (let i of toRemove) codeInjecter.splice(i, 1)
             }
         }
     )

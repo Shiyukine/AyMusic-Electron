@@ -95,13 +95,15 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('register-frame-url', async (event, args, options) => {
-        var exists = false
         var val = { url: args["url"], code: args["code"] }
-        for (let code of codeInjecter) {
-            exists ||= code["url"] == val.url
+        let toRemove = []
+        for (let i in codeInjecter) {
+            if (codeInjecter[i]["url"] == val.url) toRemove.push(i)
         }
-        if (!exists)
-            codeInjecter.push(val)
+        for (let i of toRemove) {
+            codeInjecter.splice(i, 1)
+        }
+        codeInjecter.push(val)
     })
 
     ipcMain.on('show-dialog', (event, ignore, options) => {
