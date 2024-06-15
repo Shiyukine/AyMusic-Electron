@@ -165,10 +165,6 @@ const searchUpdates = async (event) => {
         }
         if (platform == "linux") {
             appPath = path.dirname(app.getPath("exe"))
-            if (fs.existsSync(appPath + "/AketsukyUpdaterTEMP.sh")) {
-                fixPerm(appPath)
-                fs.rmSync(appPath + "/AketsukyUpdaterTEMP.sh")
-            }
             if (!fs.existsSync(appPath + "/AketsukyUpdater.sh") && configUpdate.isRelease) {
                 fixPerm(appPath)
                 await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.sh")
@@ -181,6 +177,10 @@ const searchUpdates = async (event) => {
                 })*/
                 await searchUpdates(event)
                 return
+            }
+            if (fs.existsSync(appPath + "/AketsukyUpdaterTEMP.sh")) {
+                if (alreadyFixPerm) fs.rmSync(appPath + "/AketsukyUpdaterTEMP.sh")
+                else require("child_process").execSync("pkexec rm \"" + appPath + "/AketsukyUpdaterTEMP.sh\"");
             }
         }
         let files = await getFiles(appPath)
