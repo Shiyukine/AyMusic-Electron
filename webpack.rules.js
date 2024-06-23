@@ -1,3 +1,5 @@
+var path = require("path");
+
 module.exports = [
   // Add support for native node modules
   {
@@ -11,7 +13,7 @@ module.exports = [
     use: {
       loader: 'babel-loader',
       options: {
-        exclude: /node_modules/,
+        exclude: [/node_modules/, path.resolve(__dirname, "res/service-worker.js")],
         presets: ['@babel/preset-react'],
       }
     }
