@@ -9,3 +9,4 @@ node_modules/@cliqz/adblocker-electron/dist/*
 !node_modules/@cliqz/adblocker-electron/dist/cjs
 node_modules/@cliqz/adblocker-electron/dist/cjs/*
 !node_modules/@cliqz/adblocker-electron/dist/cjs/adblocker.js
+.webpack/

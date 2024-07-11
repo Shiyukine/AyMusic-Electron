@@ -108,6 +108,8 @@ function dlFileNotTemp(win, appPath, dlPathServ, platform, file) {
 let alreadyFixPerm = false
 
 function fixPerm(appPath) {
+    var platform = process.platform
+    if (platform != "linux") return
     console.log(appPath)
     if (alreadyFixPerm) return
     require("child_process").execSync("pkexec chown -R \"$USER\":\"$USER\" \"" + appPath + "\"");
@@ -137,7 +139,7 @@ const searchUpdates = async (event) => {
             max: 100
         })
         if (out) out = JSON.parse(out)
-        let dlPathServ = configUpdate.servUrl.split("https://").join("https://files.") + "dl/AyMusic/Updates/%platform%/%file%"
+        let dlPathServ = (!(url = configUpdate.servUrl).match('^http[s]?:\/\/((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])') ? url.split("https://").join("https://files.") : url) + "dl/AyMusic/Updates/%platform%/%file%"
         let servJsonOut = {}
         for (let f in out) {
             if (f != "***INFOS***") servJsonOut[f] = out[f]
