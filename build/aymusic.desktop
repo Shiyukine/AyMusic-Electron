@@ -1,8 +1,11 @@
 [Desktop Entry]
 Name=AyMusic
-Comment=All music platform in one
+GenericName=Media player
+Comment=All music platforms in one platform
 Exec=aymusic
 Icon=com.aketsuky.aymusic
-Keywords=music;spotify;youtube;deezer;soundcloud;platform;audio
+Categories=AudioVideo;Player;
+Keywords=Audio;Player;DVD;
+Type=Application
 StartupNotify=true
 Terminal=false

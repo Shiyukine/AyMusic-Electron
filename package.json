@@ -48,13 +48,16 @@
       "icon": "build/icon.ico"
     },
     "linux": {
-      "category": "Audio",
+      "category": "AudioVideo;Player;",
       "target": [
         "deb",
         "pacman"
       ],
       "desktop": {
-        "Name": "AyMusic"
+        "Keywords": "Audio;Player;Music;Spotify;Youtube;Deezer;Soundcloud;Bandcamp;",
+        "Name": "AyMusic",
+        "Generic Name": "Media Player",
+        "Comment": "Your music in a one platform."
       },
       "artifactName": "AyMusic-${version}.${ext}",
       "synopsis": "Your music in a one platform."
