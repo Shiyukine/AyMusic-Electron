@@ -6,7 +6,7 @@ node_modules/@cliqz/*
 node_modules/@cliqz/adblocker-electron/*
 !node_modules/@cliqz/adblocker-electron/dist
 node_modules/@cliqz/adblocker-electron/dist/*
-!node_modules/@cliqz/adblocker-electron/dist/cjs
-node_modules/@cliqz/adblocker-electron/dist/cjs/*
-!node_modules/@cliqz/adblocker-electron/dist/cjs/adblocker.js
+!node_modules/@cliqz/adblocker-electron/dist/commonjs
+node_modules/@cliqz/adblocker-electron/dist/commonjs/*
+!node_modules/@cliqz/adblocker-electron/dist/commonjs/index.js
 .webpack/
