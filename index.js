@@ -291,30 +291,6 @@ async function createWindow() {
         }
         callback({ cancel: false, requestHeaders: details.requestHeaders })
     })
-    /*modifySession.webRequest.onHeadersReceived(filter, (details, callback) => {
-        const responseHeaders = details.responseHeaders || {};
-        if (!responseHeaders["Access-Control-Allow-Credentials".toLowerCase()]) {
-            for (let i in responseHeaders) {
-                if (i.toLowerCase() == "access-control-allow-origin") delete responseHeaders[i]
-            }
-            responseHeaders["access-control-allow-origin"] = "*"
-        }
-        //AyMusic code
-        delete responseHeaders['x-frame-options']
-        delete responseHeaders['content-security-policy-report-only']
-        delete responseHeaders['content-security-policy']
-        if (details.url.includes("spotify.com") || details.url.includes("www.google.com") || details.url.includes("consent.google.com")) {
-            for (let i in responseHeaders["set-cookie"]) {
-                if (responseHeaders["set-cookie"][i].includes("SameSite=Lax")) {
-                    responseHeaders["set-cookie"][i] = responseHeaders["set-cookie"][i].split("SameSite=Lax").join("SameSite=None; Secure")
-                }
-                else {
-                    responseHeaders["set-cookie"][i] += "; SameSite=None"
-                }
-            }
-        }
-        callback({ responseHeaders });
-    })*/
     protocol.handle('https', async (req) => {
         return new Promise(async (callback) => {
             const request = net.request({
@@ -368,21 +344,7 @@ async function createWindow() {
             let cookies = await session.defaultSession.cookies.get({ url: req.url })
             request.setHeader('Cookie', cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; '));
             if (req.body) {
-                if (false && !req.headers.has('content-type')) {
-                    let body = req.body ? await streamToString2(req.body) : "";
-                    /*try {
-                        JSON.parse(body);
-                        request.setHeader('Content-Type', 'application/json');
-                    }
-                    catch {
-                        request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-                    }*/
-                    request.setHeader('Content-Type', req.headers.get('content-type'));
-                    await request.write(body);
-                }
-                else {
-                    await request.write(Buffer.from(new Uint8Array(await new Response(req.body).arrayBuffer())));
-                }
+                await request.write(Buffer.from(new Uint8Array(await new Response(req.body).arrayBuffer())));
             }
             request.end();
         });
@@ -408,39 +370,3 @@ app.whenReady().then(async () => {
 });
 
 callBoundObject()
-
-function streamToString(stream) {
-    const chunks = [];
-    return new Promise((resolve, reject) => {
-        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-        stream.on('error', (err) => reject(err));
-        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    })
-}
-
-async function streamToBuffer(stream) {
-    const chunks = [];
-    for await (const chunk of stream) {
-        chunks.push(Buffer.from(chunk));
-    }
-    return Buffer.concat(chunks)
-}
-
-async function streamToString2(stream) {
-    const reader = stream.getReader();
-    const textDecoder = new TextDecoder();
-    let result = '';
-
-    async function read() {
-        const { done, value } = await reader.read();
-
-        if (done) {
-            return result;
-        }
-
-        result += textDecoder.decode(value, { stream: true });
-        return read();
-    }
-
-    return read();
-}
