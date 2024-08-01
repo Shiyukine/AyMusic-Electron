@@ -280,17 +280,12 @@ async function createWindow() {
         if (details.requestHeaders["authorization"]) {
             if (details.url.includes("spotify.com")) {
                 //console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
-                clientToken["Spotify"] = JSON.stringify({
-                    "auth": details.requestHeaders["authorization"].split("Bearer ")[1],
-                    "client": details.requestHeaders["x-spotify-connection-id"]
-                })
+                clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
             }
         }
         if (details.url.includes("https://api-auth.soundcloud.com/oauth/authorize")) {
             let uri = new URL(details.url)
-            clientToken["Soundcloud"] = JSON.stringify({
-                "auth": uri.searchParams.get("client_id")
-            })
+            clientToken["Soundcloud"] = uri.searchParams.get("client_id")
         }
         callback({ cancel: false, requestHeaders: details.requestHeaders })
     })
