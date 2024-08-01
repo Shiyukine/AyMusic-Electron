@@ -1,4 +1,4 @@
-const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents } = require('electron');
+const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog } = require('electron');
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
@@ -6,7 +6,7 @@ var { callBoundObject, codeInjecter, clientToken } = require("./boundobject.js")
 var { initLogs, addLogs } = require("./logger.js")
 var { ElectronBlocker } = require("@cliqz/adblocker-electron");
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
-var { configUpdate } = require("./update.js")
+var { configUpdate } = require("./update.js");
 const isPackaged = require('electron-is-packaged').isPackaged;
 
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
@@ -20,6 +20,10 @@ try {
     if (settings["other_maximize"] === true) maximize = true
 }
 catch { }
+
+dialog.showErrorBox = function (title, content) {
+    console.error(`UNCAUGHT ERROR\n${title}\n${content}`);
+};
 
 function mkdirp(dir) {
     if (fs.existsSync(dir)) { return true }
@@ -157,17 +161,6 @@ async function createWindow() {
         }
         callback({ cancel: false, requestHeaders: details.requestHeaders })
     })
-    ElectronBlocker.fromLists(net.fetch, [
-        'https://easylist.to/easylist/easylist.txt',
-        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
-        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
-        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
-        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
-        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
-        "https://easylist.to/easylist/easyprivacy.txt",
-    ]).then(blocker => {
-        blocker.enableBlockingInSession(session.defaultSession);
-    });
     session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
         const responseHeaders = details.responseHeaders || {};
         if (!responseHeaders["Access-Control-Allow-Credentials".toLowerCase()]) {
@@ -195,8 +188,10 @@ async function createWindow() {
             if (frame) {
                 for (let i in codeInjecter) {
                     if (encodeURI(decodeURI(frame.url)).includes(codeInjecter[i]["url"])) {
-                        const code = "if(typeof intytb == 'undefined') { let intytb = setInterval(() => { if(typeof scriptLoad == 'undefined') { try { document.getElementsByTagName('video')[0].pause(); } catch(e) {  } } else { clearInterval(intytb); } }, 1) }"
-                        frame.executeJavaScript(code)
+                        //const code = "if(typeof intytb == 'undefined') { let intytb = setInterval(() => { if(typeof scriptLoad == 'undefined') { try { document.getElementsByTagName('video')[0].pause(); } catch(e) {  } } else { clearInterval(intytb); } }, 1) }"
+                        //frame.executeJavaScript(code)
+                        //const code2 = "window.adbInterval2 = setInterval(() => { ytInitialPlayerResponse.adSlots = undefined }, 1); "
+                        //frame.executeJavaScript(code2)
                     }
                 }
             }
@@ -247,6 +242,151 @@ async function createWindow() {
     mainWindow.on("session-end", async (e) => {
         console.log(await mainWindow.webContents.executeJavaScript("window.listeners.player.disconnect()"))
     })
+    let modifySession = session.fromPartition("persist:modify")
+    modifySession.cookies.on("changed", (e, cookie, cause, removed) => {
+        let cookieUrl = "http" + (cookie.secure ? "s" : "") + "://" + (cookie.domain.startsWith(".") ? cookie.domain.substring(1) : cookie.domain) + cookie.path
+        console.log(cookieUrl)
+        session.defaultSession.cookies.set({
+            url: cookieUrl,
+            name: cookie.name,
+            value: cookie.value,
+            domain: cookie.domain,
+            httpOnly: cookie.httpOnly,
+            secure: cookie.secure,
+            expirationDate: cookie.expirationDate,
+            sameSite: cookie.sameSite,
+            hostOnly: cookie.hostOnly,
+            session: cookie.session,
+            path: cookie.path,
+        })
+        session.defaultSession.cookies.flushStore()
+    })
+    ElectronBlocker.fromLists(net.fetch, [
+        'https://easylist.to/easylist/easylist.txt',
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt",
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/quick-fixes.txt",
+        "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/unbreak.txt",
+        "https://easylist.to/easylist/easyprivacy.txt",
+    ]).then(blocker => {
+        blocker.enableBlockingInSession(modifySession);
+    });
+    modifySession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+        let ref = details.requestHeaders["Referer"]
+        if (!details.url.includes("accounts.google.com") || ref == "https://www.deezer.com/")
+            details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.243 Safari/537.36"
+        else
+            details.requestHeaders['User-Agent'] = "Chrome"
+        if (details.requestHeaders["authorization"]) {
+            if (details.url.includes("spotify.com")) {
+                //console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
+                clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
+            }
+        }
+        if (details.url.includes("https://api-auth.soundcloud.com/oauth/authorize")) {
+            let uri = new URL(details.url)
+            console.log(details.url, uri.searchParams.get("client_id"))
+            clientToken["Soundcloud"] = uri.searchParams.get("client_id")
+        }
+        callback({ cancel: false, requestHeaders: details.requestHeaders })
+    })
+    /*modifySession.webRequest.onHeadersReceived(filter, (details, callback) => {
+        const responseHeaders = details.responseHeaders || {};
+        if (!responseHeaders["Access-Control-Allow-Credentials".toLowerCase()]) {
+            for (let i in responseHeaders) {
+                if (i.toLowerCase() == "access-control-allow-origin") delete responseHeaders[i]
+            }
+            responseHeaders["access-control-allow-origin"] = "*"
+        }
+        //AyMusic code
+        delete responseHeaders['x-frame-options']
+        delete responseHeaders['content-security-policy-report-only']
+        delete responseHeaders['content-security-policy']
+        if (details.url.includes("spotify.com") || details.url.includes("www.google.com") || details.url.includes("consent.google.com")) {
+            for (let i in responseHeaders["set-cookie"]) {
+                if (responseHeaders["set-cookie"][i].includes("SameSite=Lax")) {
+                    responseHeaders["set-cookie"][i] = responseHeaders["set-cookie"][i].split("SameSite=Lax").join("SameSite=None; Secure")
+                }
+                else {
+                    responseHeaders["set-cookie"][i] += "; SameSite=None"
+                }
+            }
+        }
+        callback({ responseHeaders });
+    })*/
+    protocol.handle('https', async (req) => {
+        return new Promise(async (callback) => {
+            const request = net.request({
+                method: req.method,
+                url: req.url,
+                headers: req.headers,
+                session: modifySession,
+                redirect: 'manual',
+                useSessionCookies: true
+            });
+
+            req.headers.forEach((value, key, parent) => {
+                request.setHeader(key, value)
+            })
+
+            request.on('redirect', (statusCode, method, redirectUrl, responseHeaders) => {
+                console.log('redirecting to:', redirectUrl);
+                callback(new Response(null, {
+                    status: statusCode,
+                    headers: responseHeaders,
+                }));
+                request.followRedirect();
+            });
+
+            request.on('response', (response) => {
+                const chunks = [];
+
+                response.on('data', (chunk) => chunks.push(chunk));
+                response.on('end', () => {
+                    if (response.headers["content-type"] && response.headers["content-type"].includes("text/html") && req.url.includes("youtube.com")) {
+                        let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
+
+                        //for modifying response here
+                        const modifiedText = modifiedResponse.replace("adSlots", "fkyt");
+                        modifiedResponse = Buffer.from(modifiedText, 'utf8');
+
+                        callback(new Response(modifiedResponse, {
+                            status: response.statusCode == 204 ? 200 : response.statusCode,
+                            statusText: response.statusMessage,
+                            headers: response.headers,
+                        }));
+                    } else {
+                        callback(new Response(Buffer.concat(chunks), {
+                            status: response.statusCode == 204 ? 200 : response.statusCode,
+                            statusText: response.statusMessage,
+                            headers: response.headers,
+                        }));
+                    }
+                });
+            });
+            let cookies = await session.defaultSession.cookies.get({ url: req.url })
+            request.setHeader('Cookie', cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; '));
+            if (req.body) {
+                if (false && !req.headers.has('content-type')) {
+                    let body = req.body ? await streamToString2(req.body) : "";
+                    /*try {
+                        JSON.parse(body);
+                        request.setHeader('Content-Type', 'application/json');
+                    }
+                    catch {
+                        request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    }*/
+                    request.setHeader('Content-Type', req.headers.get('content-type'));
+                    await request.write(body);
+                }
+                else {
+                    await request.write(Buffer.from(new Uint8Array(await new Response(req.body).arrayBuffer())));
+                }
+            }
+            request.end();
+        });
+    })
 }
 
 protocol.registerSchemesAsPrivileged([
@@ -268,3 +408,39 @@ app.whenReady().then(async () => {
 });
 
 callBoundObject()
+
+function streamToString(stream) {
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        stream.on('error', (err) => reject(err));
+        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    })
+}
+
+async function streamToBuffer(stream) {
+    const chunks = [];
+    for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks)
+}
+
+async function streamToString2(stream) {
+    const reader = stream.getReader();
+    const textDecoder = new TextDecoder();
+    let result = '';
+
+    async function read() {
+        const { done, value } = await reader.read();
+
+        if (done) {
+            return result;
+        }
+
+        result += textDecoder.decode(value, { stream: true });
+        return read();
+    }
+
+    return read();
+}
