@@ -245,7 +245,6 @@ async function createWindow() {
     let modifySession = session.fromPartition("persist:modify")
     modifySession.cookies.on("changed", (e, cookie, cause, removed) => {
         let cookieUrl = "http" + (cookie.secure ? "s" : "") + "://" + (cookie.domain.startsWith(".") ? cookie.domain.substring(1) : cookie.domain) + cookie.path
-        console.log(cookieUrl)
         session.defaultSession.cookies.set({
             url: cookieUrl,
             name: cookie.name,
@@ -281,13 +280,17 @@ async function createWindow() {
         if (details.requestHeaders["authorization"]) {
             if (details.url.includes("spotify.com")) {
                 //console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
-                clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
+                clientToken["Spotify"] = JSON.stringify({
+                    "auth": details.requestHeaders["authorization"].split("Bearer ")[1],
+                    "client": details.requestHeaders["x-spotify-connection-id"]
+                })
             }
         }
         if (details.url.includes("https://api-auth.soundcloud.com/oauth/authorize")) {
             let uri = new URL(details.url)
-            console.log(details.url, uri.searchParams.get("client_id"))
-            clientToken["Soundcloud"] = uri.searchParams.get("client_id")
+            clientToken["Soundcloud"] = JSON.stringify({
+                "auth": uri.searchParams.get("client_id")
+            })
         }
         callback({ cancel: false, requestHeaders: details.requestHeaders })
     })

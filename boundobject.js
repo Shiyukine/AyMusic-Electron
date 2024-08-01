@@ -183,21 +183,37 @@ const callBoundObject = () => {
         return new Promise(r => {
             var url = app.getPath('appData') + "/AyMusic/Cache/" + args["fileName"]
             mkdirp(path.dirname(url))
-            fs.appendFileSync(url, "")
             if (args["bytes"]) {
-                fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { r(err) })
+                fs.appendFile(url, "", function (ret) {
+                    if (!ret) {
+                        fs.writeFile(url, Buffer.from(args["bytes"]), function (err) {
+                            if (err) r(err)
+                            else r()
+                        })
+                    }
+                    else r(ret)
+                })
             }
+            else r()
         })
     })
 
-    ipcMain.handle('save-data', async (event, args, options) => {
+    ipcMain.handle('save-data', (event, args, options) => {
         return new Promise(r => {
             var url = app.getPath('appData') + "/AyMusic/Data/" + args["fileName"]
-            mkdirp(path.dirname(url))
-            fs.appendFileSync(url, "")
+            mmkdirp(path.dirname(url))
             if (args["bytes"]) {
-                fs.writeFile(url, Buffer.from(args["bytes"]), function (err) { r(err) })
+                fs.appendFile(url, "", function (ret) {
+                    if (!ret) {
+                        fs.writeFile(url, Buffer.from(args["bytes"]), function (err) {
+                            if (err) r(err)
+                            else r()
+                        })
+                    }
+                    else r(ret)
+                })
             }
+            else r()
         })
     })
 
