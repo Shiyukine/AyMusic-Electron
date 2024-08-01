@@ -306,6 +306,10 @@ async function createWindow() {
                 request.setHeader(key, value)
             })
 
+            request.on('error', (error) => {
+                console.error('request error:', error);
+            });
+
             request.on('redirect', (statusCode, method, redirectUrl, responseHeaders) => {
                 console.log('redirecting to:', redirectUrl);
                 callback(new Response(null, {
