@@ -1,4 +1,4 @@
-const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog } = require('electron');
+const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog, crashReporter } = require('electron');
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
@@ -10,7 +10,9 @@ var { configUpdate } = require("./update.js");
 const isPackaged = require('electron-is-packaged').isPackaged;
 
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
+app.setPath('crashDumps', app.getPath("appData") + "/AyMusic/CrashDumps/");
 app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.243 Safari/537.36"
+crashReporter.start({ uploadToServer: false })
 
 var maximize = false
 try {
@@ -297,7 +299,8 @@ async function createWindow() {
                 headers: req.headers,
                 session: modifySession,
                 redirect: 'manual',
-                useSessionCookies: true
+                useSessionCookies: true,
+                cache: !isPackaged ? "no-cache" : "default",
             });
 
             req.headers.forEach((value, key, parent) => {
@@ -334,7 +337,21 @@ async function createWindow() {
                             statusText: response.statusMessage,
                             headers: response.headers,
                         }));
-                    } else {
+                    }
+                    else if (response.headers["content-type"] && response.headers["content-type"].includes("text/html") && req.url.includes("deezer.com")) {
+                        let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
+
+                        //for modifying response here   
+                        const modifiedText = modifiedResponse.replace('id="dzr-app"', 'id="dzr-app" style="display: none;"');
+                        modifiedResponse = Buffer.from(modifiedText, 'utf8');
+
+                        callback(new Response(modifiedResponse, {
+                            status: response.statusCode == 204 ? 200 : response.statusCode,
+                            statusText: response.statusMessage,
+                            headers: response.headers,
+                        }));
+                    }
+                    else {
                         callback(new Response(Buffer.concat(chunks), {
                             status: response.statusCode == 204 ? 200 : response.statusCode,
                             statusText: response.statusMessage,
