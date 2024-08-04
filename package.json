@@ -11,7 +11,8 @@
     "startFix": "electron . --no-sandbox --no-zygote",
     "buildMac": "electron-builder -m",
     "buildWin": "electron-builder -w",
-    "buildLinux": "electron-builder -l"
+    "buildLinux": "electron-builder -l",
+    "signWin": "py -m castlabs_evs.vmp sign-pkg .\\node_modules\\electron\\dist"
   },
   "author": {
     "email": "aketsuky@gmail.com",

@@ -11,7 +11,7 @@ const isPackaged = require('electron-is-packaged').isPackaged;
 
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
 app.setPath('crashDumps', app.getPath("appData") + "/AyMusic/CrashDumps/");
-app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.243 Safari/537.36"
+app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36"
 crashReporter.start({ uploadToServer: false })
 
 var maximize = false
@@ -127,14 +127,14 @@ async function createWindow() {
             })
         }
     })
-    //mainWindow.webContents.userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.243 Safari/537.36"
-    mainWindow.loadURL("app://root/index.html"/*, { userAgent: "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.243 Safari/537.36" }*/);
+    //mainWindow.webContents.userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36"
+    mainWindow.loadURL("app://root/index.html"/*, { userAgent: "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36" }*/);
     mainWindow.webContents.on(
         'did-frame-navigate',
         (event, url, httpResponseCode, httpStatusText, isMainFrame, frameProcessId, frameRoutingId) => {
             const frame = webFrameMain.fromId(frameProcessId, frameRoutingId)
             if (frame) {
-                //webContents.fromFrame(frame).userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.243 Safari/537.36"
+                //webContents.fromFrame(frame).userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36"
                 for (let i in codeInjecter) {
                     if (encodeURI(decodeURIComponent(frame.url)).includes(encodeURI(decodeURIComponent(codeInjecter[i]["url"])))) {
                         const code = "//injected script by AyMusic app\n" + codeInjecter[i]["code"] + "; console.log('script injected for URL = " + codeInjecter[i]["url"].split("'").join("\\'") + " \\nactual url: ' + window.location.href)"
@@ -147,7 +147,7 @@ async function createWindow() {
     session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
         let ref = details.requestHeaders["Referer"]
         if (!details.url.includes("accounts.google.com") || ref == "https://www.deezer.com/")
-            details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.243 Safari/537.36"
+            details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36"
         else
             details.requestHeaders['User-Agent'] = "Chrome"
         if (details.requestHeaders["authorization"]) {
@@ -276,7 +276,7 @@ async function createWindow() {
     modifySession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
         let ref = details.requestHeaders["Referer"]
         if (!details.url.includes("accounts.google.com") || ref == "https://www.deezer.com/")
-            details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.243 Safari/537.36"
+            details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36"
         else
             details.requestHeaders['User-Agent'] = "Chrome"
         if (details.requestHeaders["authorization"]) {
@@ -333,7 +333,7 @@ async function createWindow() {
                         modifiedResponse = Buffer.from(modifiedText, 'utf8');
 
                         callback(new Response(modifiedResponse, {
-                            status: response.statusCode == 204 ? 200 : response.statusCode,
+                            status: response.statusCode == 204 || response.statusCode == 304 ? 200 : response.statusCode,
                             statusText: response.statusMessage,
                             headers: response.headers,
                         }));
@@ -346,7 +346,7 @@ async function createWindow() {
                         modifiedResponse = Buffer.from(modifiedText, 'utf8');
 
                         callback(new Response(modifiedResponse, {
-                            status: response.statusCode == 204 ? 200 : response.statusCode,
+                            status: response.statusCode == 204 || response.statusCode == 304 ? 200 : response.statusCode,
                             statusText: response.statusMessage,
                             headers: response.headers,
                         }));
