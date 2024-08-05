@@ -18,6 +18,10 @@ function mkdirp(dir) {
 }
 
 const callBoundObject = () => {
+    var curPlatform = process.platform
+    if (curPlatform == "darwin") curPlatform = "MacOS"
+    if (curPlatform == "win32") curPlatform = "Windows"
+    if (curPlatform == "linux") curPlatform = "Linux"
     const rpc = new DiscordRPC.Client({ transport: 'ipc' });
     if (process.platform == "win32") {
         const clientId = "1125877607817285742"
@@ -113,7 +117,7 @@ const callBoundObject = () => {
         let toRemove = []
         for (let i in overrideResponses) {
             for (let j in val)
-                if (overrideResponses[i].url.url == val[j].url.url) toRemove.push(i)
+                if (overrideResponses[i].url.url == val[j].url.url && val[j].platforms.includes(curPlatform)) toRemove.push(i)
         }
         for (let i of toRemove) {
             overrideResponses.splice(i, 1)
