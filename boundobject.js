@@ -7,6 +7,7 @@ var { configLogs } = require("./logger.js")
 const DiscordRPC = require('discord-rpc');
 
 var codeInjecter = []
+var overrideResponses = []
 var clientToken = {}
 
 function mkdirp(dir) {
@@ -104,6 +105,22 @@ const callBoundObject = () => {
             codeInjecter.splice(i, 1)
         }
         codeInjecter.push(val)
+    })
+
+    ipcMain.on('register-override-response', async (event, args, options) => {
+        let val = JSON.parse(args["json"])
+        if (val.length == 0) return
+        let toRemove = []
+        for (let i in overrideResponses) {
+            for (let j in val)
+                if (overrideResponses[i].url.url == val[j].url.url) toRemove.push(i)
+        }
+        for (let i of toRemove) {
+            overrideResponses.splice(i, 1)
+        }
+        val.forEach(element => {
+            overrideResponses.push(element)
+        });
     })
 
     ipcMain.on('show-dialog', (event, ignore, options) => {
@@ -268,3 +285,4 @@ const callBoundObject = () => {
 module.exports.callBoundObject = callBoundObject;
 module.exports.codeInjecter = codeInjecter;
 module.exports.clientToken = clientToken;
+module.exports.overrideResponses = overrideResponses;

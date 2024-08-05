@@ -2,7 +2,7 @@ const { app, components, BrowserWindow, session, protocol, net, webFrameMain, we
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
-var { callBoundObject, codeInjecter, clientToken } = require("./boundobject.js")
+var { callBoundObject, codeInjecter, clientToken, overrideResponses } = require("./boundobject.js")
 var { initLogs, addLogs } = require("./logger.js")
 var { ElectronBlocker } = require("@cliqz/adblocker-electron");
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
@@ -259,6 +259,8 @@ async function createWindow() {
             hostOnly: cookie.hostOnly,
             session: cookie.session,
             path: cookie.path,
+        }).catch((e) => {
+            console.error("Unable to set cookie", cookie.name, cookieUrl)
         })
         session.defaultSession.cookies.flushStore()
     })
@@ -272,6 +274,7 @@ async function createWindow() {
         "https://easylist.to/easylist/easyprivacy.txt",
     ]).then(blocker => {
         blocker.enableBlockingInSession(modifySession);
+        blocker.enableBlockingInSession(session.defaultSession);
     });
     modifySession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
         let ref = details.requestHeaders["Referer"]
@@ -308,6 +311,7 @@ async function createWindow() {
             })
 
             request.on('error', (error) => {
+                if (error.message.includes("net::ERR_BLOCKED_BY_CLIENT")) return
                 console.error('request error:', error);
             });
 
@@ -325,39 +329,30 @@ async function createWindow() {
 
                 response.on('data', (chunk) => chunks.push(chunk));
                 response.on('end', () => {
-                    if (response.headers["content-type"] && response.headers["content-type"].includes("text/html") && req.url.includes("youtube.com")) {
-                        let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
-
-                        //for modifying response here
-                        const modifiedText = modifiedResponse.replace("adSlots", "fkyt");
-                        modifiedResponse = Buffer.from(modifiedText, 'utf8');
-
-                        callback(new Response(modifiedResponse, {
-                            status: response.statusCode == 204 || response.statusCode == 304 ? 200 : response.statusCode,
-                            statusText: response.statusMessage,
-                            headers: response.headers,
-                        }));
+                    try {
+                        overrideResponses.forEach(x => {
+                            if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && x.method.toLowerCase() == req.method.toLowerCase() && response.headers[x.header.name.toLowerCase()] && ((x.header.includes && response.headers[x.header.name.toLowerCase()].toLowerCase().includes(x.header.value.toLowerCase())) || response.headers[x.header.name].toLowerCase() == x.header.value.toLowerCase())) {
+                                let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
+                                x.overrides.forEach(element => {
+                                    modifiedResponse = modifiedResponse.split(element.search).join(element.replace)
+                                });
+                                callback(new Response(modifiedResponse, {
+                                    status: response.statusCode == 204 || response.statusCode == 304 ? 200 : response.statusCode,
+                                    statusText: response.statusMessage,
+                                    headers: response.headers,
+                                }));
+                                return
+                            }
+                        });
                     }
-                    else if (response.headers["content-type"] && response.headers["content-type"].includes("text/html") && req.url.includes("deezer.com")) {
-                        let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
-
-                        //for modifying response here   
-                        const modifiedText = modifiedResponse.replace('id="dzr-app"', 'id="dzr-app" style="display: none;"');
-                        modifiedResponse = Buffer.from(modifiedText, 'utf8');
-
-                        callback(new Response(modifiedResponse, {
-                            status: response.statusCode == 204 || response.statusCode == 304 ? 200 : response.statusCode,
-                            statusText: response.statusMessage,
-                            headers: response.headers,
-                        }));
+                    catch (e) {
+                        console.error("Malformed override response settings!", e)
                     }
-                    else {
-                        callback(new Response(Buffer.concat(chunks), {
-                            status: response.statusCode == 204 ? 200 : response.statusCode,
-                            statusText: response.statusMessage,
-                            headers: response.headers,
-                        }));
-                    }
+                    callback(new Response(Buffer.concat(chunks), {
+                        status: response.statusCode == 204 || response.statusCode == 304 ? 200 : response.statusCode,
+                        statusText: response.statusMessage,
+                        headers: response.headers,
+                    }));
                 });
             });
             let cookies = await session.defaultSession.cookies.get({ url: req.url })
