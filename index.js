@@ -144,62 +144,6 @@ async function createWindow() {
             }
         }
     )
-    session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-        let ref = details.requestHeaders["Referer"]
-        if (!details.url.includes("accounts.google.com") || ref == "https://www.deezer.com/")
-            details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36"
-        else
-            details.requestHeaders['User-Agent'] = "Chrome"
-        if (details.requestHeaders["authorization"]) {
-            if (details.url.includes("spotify.com")) {
-                //console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
-                clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
-            }
-        }
-        if (details.url.includes("https://api-auth.soundcloud.com/oauth/authorize")) {
-            let uri = new URL(details.url)
-            console.log(details.url, uri.searchParams.get("client_id"))
-            clientToken["Soundcloud"] = uri.searchParams.get("client_id")
-        }
-        callback({ cancel: false, requestHeaders: details.requestHeaders })
-    })
-    session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
-        const responseHeaders = details.responseHeaders || {};
-        if (!responseHeaders["Access-Control-Allow-Credentials".toLowerCase()]) {
-            for (let i in responseHeaders) {
-                if (i.toLowerCase() == "access-control-allow-origin") delete responseHeaders[i]
-            }
-            responseHeaders["access-control-allow-origin"] = "*"
-        }
-        //AyMusic code
-        delete responseHeaders['x-frame-options']
-        delete responseHeaders['content-security-policy-report-only']
-        delete responseHeaders['content-security-policy']
-        if (details.url.includes("spotify.com") || details.url.includes("www.google.com") || details.url.includes("consent.google.com")) {
-            for (let i in responseHeaders["set-cookie"]) {
-                if (responseHeaders["set-cookie"][i].includes("SameSite=Lax")) {
-                    responseHeaders["set-cookie"][i] = responseHeaders["set-cookie"][i].split("SameSite=Lax").join("SameSite=None; Secure")
-                }
-                else {
-                    responseHeaders["set-cookie"][i] += "; SameSite=None"
-                }
-            }
-        }
-        if (details.url.includes("youtube.com")) {
-            const frame = details.frame
-            if (frame) {
-                for (let i in codeInjecter) {
-                    if (encodeURI(decodeURI(frame.url)).includes(codeInjecter[i]["url"])) {
-                        //const code = "if(typeof intytb == 'undefined') { let intytb = setInterval(() => { if(typeof scriptLoad == 'undefined') { try { document.getElementsByTagName('video')[0].pause(); } catch(e) {  } } else { clearInterval(intytb); } }, 1) }"
-                        //frame.executeJavaScript(code)
-                        //const code2 = "window.adbInterval2 = setInterval(() => { ytInitialPlayerResponse.adSlots = undefined }, 1); "
-                        //frame.executeJavaScript(code2)
-                    }
-                }
-            }
-        }
-        callback({ responseHeaders });
-    })
     mainWindow.webContents.on('dom-ready', async (e) => {
         var platform = process.platform
         if (platform == "darwin") platform = "MacOS"
