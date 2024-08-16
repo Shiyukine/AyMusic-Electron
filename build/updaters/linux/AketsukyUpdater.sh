@@ -45,10 +45,12 @@ else
         newstr=${newstr/"AketsukyUpdaterTEMP.sh"/""}
         #mv -f DownloadTemp/* ./
         cp -rf $newstr/DownloadTemp/* $newstr/
+        rm -rf $newstr/DownloadTemp/
         echo "Updated finished. Launching $app..."
         #(set -m; $newstr$app &)
         #$newstr$app
         #$SHELL
+        chmod +x $newstr/aymusic
         pkexec chown -R root:root $newstr
         $newstr$app < /dev/null &> /dev/null & disown || $newstr$app --no-sandbox --no-zygote < /dev/null &> /dev/null & disown
         #gnome-terminal echo
