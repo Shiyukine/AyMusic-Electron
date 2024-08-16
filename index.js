@@ -281,7 +281,7 @@ async function createWindow() {
                                     modifiedResponse = modifiedResponse.split(element.search).join(element.replace)
                                 });
                                 callback(new Response(modifiedResponse, {
-                                    status: response.statusCode == 204 || response.statusCode == 304 ? 200 : response.statusCode,
+                                    status: response.statusCode == 204 ? 200 : response.statusCode,
                                     statusText: response.statusMessage,
                                     headers: response.headers,
                                 }));
@@ -293,13 +293,16 @@ async function createWindow() {
                         console.error("Malformed override response settings!", e)
                     }
                     callback(new Response(Buffer.concat(chunks), {
-                        status: response.statusCode == 204 || response.statusCode == 304 ? 200 : response.statusCode,
+                        status: response.statusCode == 204 ? 200 : response.statusCode,
                         statusText: response.statusMessage,
                         headers: response.headers,
                     }));
                 });
             });
             let cookies = await session.defaultSession.cookies.get({ url: req.url })
+            // remove all 304 http code generators
+            request.removeHeader("If-Modified-Since")
+            request.removeHeader("If-None-Match")
             request.setHeader('Cookie', cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; '));
             if (req.body) {
                 await request.write(Buffer.from(new Uint8Array(await new Response(req.body).arrayBuffer())));
