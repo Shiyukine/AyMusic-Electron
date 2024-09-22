@@ -191,6 +191,7 @@ async function createWindow() {
     let modifySession = session.fromPartition("persist:modify")
     modifySession.cookies.on("changed", (e, cookie, cause, removed) => {
         let cookieUrl = "http" + (cookie.secure ? "s" : "") + "://" + (cookie.domain.startsWith(".") ? cookie.domain.substring(1) : cookie.domain) + cookie.path
+        //console.log("Cookie changed", cookie.name, cookieUrl)
         session.defaultSession.cookies.set({
             url: cookieUrl,
             name: cookie.name,
@@ -204,7 +205,7 @@ async function createWindow() {
             session: cookie.session,
             path: cookie.path,
         }).catch((e) => {
-            console.error("Unable to set cookie", cookie.name, cookieUrl)
+            console.error("Unable to set cookie", cookie.name, cookieUrl, e)
         })
         session.defaultSession.cookies.flushStore()
     })
