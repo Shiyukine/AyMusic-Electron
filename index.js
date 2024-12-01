@@ -276,18 +276,20 @@ async function createWindow() {
                 response.on('end', () => {
                     try {
                         overrideResponses.forEach(x => {
-                            if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && x.method.toLowerCase() == req.method.toLowerCase() && response.headers[x.header.name.toLowerCase()] && ((x.header.includes && response.headers[x.header.name.toLowerCase()].toLowerCase().includes(x.header.value.toLowerCase())) || response.headers[x.header.name].toLowerCase() == x.header.value.toLowerCase())) {
-                                let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
-                                x.overrides.forEach(element => {
-                                    modifiedResponse = modifiedResponse.split(element.search).join(element.replace)
-                                });
-                                callback(new Response(modifiedResponse, {
-                                    status: response.statusCode == 204 ? 200 : response.statusCode,
-                                    statusText: response.statusMessage,
-                                    headers: response.headers,
-                                }));
-                                return
-                            }
+                            x.headers.forEach(y => {
+                                if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && x.method.toLowerCase() == req.method.toLowerCase() && response.headers[y.name.toLowerCase()] && ((y.includes && response.headers[y.name.toLowerCase()].toLowerCase().includes(y.value.toLowerCase())) || response.headers[y.name].toLowerCase() == y.value.toLowerCase())) {
+                                    let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
+                                    x.overrides.forEach(element => {
+                                        modifiedResponse = modifiedResponse.split(element.search).join(element.replace)
+                                    });
+                                    callback(new Response(modifiedResponse, {
+                                        status: response.statusCode == 204 ? 200 : response.statusCode,
+                                        statusText: response.statusMessage,
+                                        headers: response.headers,
+                                    }));
+                                    return
+                                }
+                            });
                         });
                     }
                     catch (e) {
