@@ -13,6 +13,7 @@ app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
 app.setPath('crashDumps', app.getPath("appData") + "/AyMusic/CrashDumps/");
 app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36"
 crashReporter.start({ uploadToServer: false })
+require('dotenv').config()
 
 var maximize = false
 try {

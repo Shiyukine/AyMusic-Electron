@@ -4,7 +4,7 @@ const url = require('url');
 var fs = require('fs');
 var { configUpdate, searchUpdates } = require("./update.js")
 var { configLogs } = require("./logger.js")
-const DiscordRPC = require('discord-rpc');
+const DiscordRPC = require('./discord-rpc');
 
 var codeInjecter = []
 var overrideResponses = []
@@ -23,8 +23,8 @@ const callBoundObject = () => {
     if (curPlatform == "win32") curPlatform = "Windows"
     if (curPlatform == "linux") curPlatform = "Linux"
     const rpc = new DiscordRPC.Client({ transport: 'ipc' });
+    const clientId = process.env.DISCORD_CLIENT_ID;
     if (process.platform == "win32") {
-        const clientId = "1125877607817285742"
         rpc.login({ clientId }).catch(console.error);
     }
 
@@ -222,7 +222,7 @@ const callBoundObject = () => {
     ipcMain.handle('save-data', (event, args, options) => {
         return new Promise(r => {
             var url = app.getPath('appData') + "/AyMusic/Data/" + args["fileName"]
-            mmkdirp(path.dirname(url))
+            mkdirp(path.dirname(url))
             if (args["bytes"]) {
                 fs.appendFile(url, "", function (ret) {
                     if (!ret) {
@@ -267,12 +267,14 @@ const callBoundObject = () => {
     ipcMain.on('discord-rpc', async (event, args, options) => {
         if (process.platform == "win32") {
             try {
-                rpc.setActivity(args);
+                if(args) rpc.setActivity(args);
+                else rpc.clearActivity();
             }
             catch {
                 try {
                     rpc.login({ clientId }).catch(console.error);
-                    rpc.setActivity(args);
+                    if(args) rpc.setActivity(args);
+                    else rpc.clearActivity();
                 }
                 catch (e) {
                     console.error(e)
