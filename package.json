@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Created by Shiyukine from Aketsuky. AyMusic allows you to create playlists with music on Spotify, Youtube, Deezer, Soundclound, Bandcamp and locally in one platform.",
   "main": "index.js",
-  "homepage": "https://aketsuky.net/projects/AyMusic.php",
+  "homepage": "https://aketsuky.com/projects/AyMusic.php",
   "displayName": "AyMusic",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
