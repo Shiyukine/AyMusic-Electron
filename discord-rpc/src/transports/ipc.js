@@ -135,7 +135,9 @@ class IPCTransport extends EventEmitter {
                   this.client.emit('error', e);
                 });
             }
-            this.emit('message', data);
+            this.emit('message', data).catch((e) => {
+              this.emit('error', e);
+            });
             break;
           case OPCodes.CLOSE:
             this.emit('close', data);
