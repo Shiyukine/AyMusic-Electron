@@ -11,7 +11,7 @@ const isPackaged = require('electron-is-packaged').isPackaged;
 
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
 app.setPath('crashDumps', app.getPath("appData") + "/AyMusic/CrashDumps/");
-app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36"
+app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
 crashReporter.start({ uploadToServer: false })
 require('dotenv').config()
 
@@ -222,37 +222,35 @@ async function createWindow() {
         blocker.enableBlockingInSession(modifySession);
         blocker.enableBlockingInSession(session.defaultSession);
     });
-    modifySession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-        let ref = details.requestHeaders["Referer"]
-        if (!details.url.includes("accounts.google.com") || ref == "https://www.deezer.com/")
-            details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36"
-        else
-            details.requestHeaders['User-Agent'] = "Chrome"
-        if (details.requestHeaders["authorization"]) {
-            if (details.url.includes("spotify.com")) {
-                //console.log(details.requestHeaders["authorization"].split("Bearer ")[1])
-                clientToken["Spotify"] = details.requestHeaders["authorization"].split("Bearer ")[1]
-            }
-        }
-        if (details.url.includes("https://api-auth.soundcloud.com/oauth/authorize")) {
-            let uri = new URL(details.url)
-            clientToken["Soundcloud"] = uri.searchParams.get("client_id")
-        }
-        callback({ cancel: false, requestHeaders: details.requestHeaders })
-    })
     protocol.handle('https', async (req) => {
         return new Promise(async (callback) => {
             const request = net.request({
                 method: req.method,
                 url: req.url,
-                headers: req.headers,
                 session: modifySession,
                 redirect: 'manual',
                 useSessionCookies: true,
                 cache: !isPackaged ? "no-cache" : "default",
+                credentials: 'include',
             });
 
             req.headers.forEach((value, key, parent) => {
+                if (key.toLowerCase() == "authorization") {
+                    if (req.url.includes("spotify.com")) {
+                        clientToken["Spotify"] = value.split("Bearer ")[1]
+                    }
+                }
+                if (req.url.includes("https://api-auth.soundcloud.com/oauth/authorize")) {
+                    let uri = new URL(req.url)
+                    clientToken["Soundcloud"] = uri.searchParams.get("client_id")
+                }
+                if(key.toLowerCase() == "User-Agent".toLowerCase()) {
+                    if (!req.url.includes("accounts.google.com") || req.referrer == "https://account.deezer.com/")
+                        value = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+                    else {
+                        value = "Chrome"
+                    }
+                }
                 request.setHeader(key, value)
             })
 
@@ -309,7 +307,7 @@ async function createWindow() {
             request.removeHeader("If-None-Match")
             request.setHeader('Cookie', cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; '));
             if (req.body) {
-                await request.write(Buffer.from(new Uint8Array(await new Response(req.body).arrayBuffer())));
+                await request.write(Buffer.from(await new Response(req.body).arrayBuffer()));
             }
             request.end();
         });
