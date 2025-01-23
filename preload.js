@@ -20,6 +20,9 @@ contextBridge.exposeInMainWorld("boundobject", {
             data: JSON.parse(newSettings)
         })
     },
+    addBadUrl: (url, includes) => {
+        ipcRenderer.send("add-bad-url", { url: url, includes: includes })
+    },
     changeUserSettingsFile: (file, newSettings) => {
         return ipcRenderer.send("write-settings", {
             file: file,

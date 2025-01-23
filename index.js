@@ -8,6 +8,7 @@ var { ElectronBlocker } = require("@cliqz/adblocker-electron");
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
 var { configUpdate } = require("./update.js");
 const isPackaged = require('electron-is-packaged').isPackaged;
+var { adblockList, isBadUrl } = require("./adblock.js")
 
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
 app.setPath('crashDumps', app.getPath("appData") + "/AyMusic/CrashDumps/");
@@ -224,6 +225,16 @@ async function createWindow() {
     });
     protocol.handle('https', async (req) => {
         return new Promise(async (callback) => {
+            if(isBadUrl(req.url)) {
+                callback(new Response(null, {
+                    status: 200,
+                    statusText: "OK",
+                    headers: {
+                        "Content-Type": "text/html"
+                    }
+                }))
+                return
+            }
             const request = net.request({
                 method: req.method,
                 url: req.url,
@@ -275,8 +286,24 @@ async function createWindow() {
                 response.on('end', () => {
                     try {
                         overrideResponses.forEach(x => {
-                            x.headers.forEach(y => {
-                                if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && x.method.toLowerCase() == req.method.toLowerCase() && response.headers[y.name.toLowerCase()] && ((y.includes && response.headers[y.name.toLowerCase()].toLowerCase().includes(y.value.toLowerCase())) || response.headers[y.name].toLowerCase() == y.value.toLowerCase())) {
+                            if(x.headers != []) {
+                                x.headers.forEach(y => {
+                                    if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && x.method.toLowerCase() == req.method.toLowerCase() && response.headers[y.name.toLowerCase()] && ((y.includes && response.headers[y.name.toLowerCase()].toLowerCase().includes(y.value.toLowerCase())) || response.headers[y.name].toLowerCase() == y.value.toLowerCase())) {
+                                        let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
+                                        x.overrides.forEach(element => {
+                                            modifiedResponse = modifiedResponse.split(element.search).join(element.replace)
+                                        });
+                                        callback(new Response(modifiedResponse, {
+                                            status: response.statusCode == 204 ? 200 : response.statusCode,
+                                            statusText: response.statusMessage,
+                                            headers: response.headers,
+                                        }));
+                                        return
+                                    }
+                                });
+                            }
+                            else {
+                                if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && x.method.toLowerCase() == req.method.toLowerCase()) {
                                     let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
                                     x.overrides.forEach(element => {
                                         modifiedResponse = modifiedResponse.split(element.search).join(element.replace)
@@ -288,7 +315,7 @@ async function createWindow() {
                                     }));
                                     return
                                 }
-                            });
+                            }
                         });
                     }
                     catch (e) {

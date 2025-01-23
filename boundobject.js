@@ -5,6 +5,7 @@ var fs = require('fs');
 var { configUpdate, searchUpdates } = require("./update.js")
 var { configLogs } = require("./logger.js")
 const DiscordRPC = require('./discord-rpc');
+var { adblockList, addBlockRequest } = require("./adblock.js")
 
 var codeInjecter = []
 var overrideResponses = []
@@ -123,7 +124,7 @@ const callBoundObject = () => {
             overrideResponses.splice(i, 1)
         }
         val.forEach(element => {
-            overrideResponses.push(element)
+            if(element.platforms.includes(curPlatform)) overrideResponses.push(element)
         });
     })
 
@@ -285,6 +286,10 @@ const callBoundObject = () => {
 
     ipcMain.on('search-updates', async (event, args, options) => {
         searchUpdates(event)
+    })
+
+    ipcMain.on('add-bad-url', async (event, args, options) => {
+        addBlockRequest(args["url"], args["includes"])
     })
 }
 
