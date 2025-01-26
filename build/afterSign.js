@@ -19,11 +19,11 @@ exports.default = function (context) {
     // VMP sign via EVS
     const { execSync } = require('child_process')
     console.log('VMP signing start')
-    execSync('py -m castlabs_evs.vmp sign-pkg ./dist/win-unpacked')
+    execSync('python -m castlabs_evs.vmp sign-pkg ./dist/win-unpacked')
     console.log('VMP signing complete')
     execSync("copy .\\build\\updaters\\win\\* .\\dist\\win-unpacked\\")
     console.log('Creating output md5')
-    execSync('py ./build/md5output.py win -B')
+    execSync('python ./build/md5output.py win -B')
     console.log('md5 complete')
   }
 }
