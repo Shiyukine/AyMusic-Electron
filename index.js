@@ -226,11 +226,11 @@ async function createWindow() {
     protocol.handle('https', async (req) => {
         return new Promise(async (callback) => {
             if(isBadUrl(req.url)) {
-                callback(new Response(null, {
+                callback(new Response(Buffer.from("blocked."), {
                     status: 200,
                     statusText: "OK",
                     headers: {
-                        "Content-Type": "text/html"
+                        "Content-Type": "text/plain",
                     }
                 }))
                 return
