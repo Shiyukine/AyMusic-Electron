@@ -18,8 +18,8 @@ async function getFiles(dir) {
 
 var configUpdate = {
     servUrl: "",
-    versionName: "0.3.2",
-    versionCode: 9,
+    versionName: "0.3.3",
+    versionCode: 10,
     isRelease: false,
     closing: false
 }
