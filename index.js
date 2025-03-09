@@ -147,7 +147,6 @@ async function createWindow() {
         }
     )
     mainWindow.webContents.on('dom-ready', async (e) => {
-        overrideResponses = []
         var platform = process.platform
         if (platform == "darwin") platform = "MacOS"
         if (platform == "win32") platform = "Windows"
