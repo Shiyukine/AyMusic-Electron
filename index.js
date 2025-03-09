@@ -147,6 +147,7 @@ async function createWindow() {
         }
     )
     mainWindow.webContents.on('dom-ready', async (e) => {
+        overrideResponses = []
         var platform = process.platform
         if (platform == "darwin") platform = "MacOS"
         if (platform == "win32") platform = "Windows"
@@ -225,7 +226,7 @@ async function createWindow() {
     });
     protocol.handle('https', async (req) => {
         return new Promise(async (callback) => {
-            if(isBadUrl(req.url)) {
+            if (isBadUrl(req.url)) {
                 callback(new Response(Buffer.from("blocked."), {
                     status: 200,
                     statusText: "OK",
@@ -255,7 +256,7 @@ async function createWindow() {
                     let uri = new URL(req.url)
                     clientToken["Soundcloud"] = uri.searchParams.get("client_id")
                 }
-                if(key.toLowerCase() == "User-Agent".toLowerCase()) {
+                if (key.toLowerCase() == "User-Agent".toLowerCase()) {
                     if (!req.url.includes("accounts.google.com") || req.referrer == "https://account.deezer.com/")
                         value = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
                     else {
@@ -286,7 +287,7 @@ async function createWindow() {
                 response.on('end', () => {
                     try {
                         overrideResponses.forEach(x => {
-                            if(x.headers != []) {
+                            if (x.headers != []) {
                                 x.headers.forEach(y => {
                                     if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && x.method.toLowerCase() == req.method.toLowerCase() && response.headers[y.name.toLowerCase()] && ((y.includes && response.headers[y.name.toLowerCase()].toLowerCase().includes(y.value.toLowerCase())) || response.headers[y.name].toLowerCase() == y.value.toLowerCase())) {
                                         let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');

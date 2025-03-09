@@ -115,16 +115,8 @@ const callBoundObject = () => {
     ipcMain.on('register-override-response', async (event, args, options) => {
         let val = JSON.parse(args["json"])
         if (val.length == 0) return
-        let toRemove = []
-        for (let i in overrideResponses) {
-            for (let j in val)
-                if (overrideResponses[i].url.url == val[j].url.url && val[j].platforms.includes(curPlatform)) toRemove.push(i)
-        }
-        for (let i of toRemove) {
-            overrideResponses.splice(i, 1)
-        }
         val.forEach(element => {
-            if(element.platforms.includes(curPlatform)) overrideResponses.push(element)
+            if (element.platforms.includes(curPlatform) && !overrideResponses.includes(element)) overrideResponses.push(element)
         });
     })
 
@@ -268,13 +260,13 @@ const callBoundObject = () => {
     ipcMain.on('discord-rpc', async (event, args, options) => {
         if (process.platform == "win32") {
             try {
-                if(args) rpc.setActivity(args);
+                if (args) rpc.setActivity(args);
                 else rpc.clearActivity();
             }
             catch {
                 try {
                     rpc.login({ clientId }).catch(console.error);
-                    if(args) rpc.setActivity(args);
+                    if (args) rpc.setActivity(args);
                     else rpc.clearActivity();
                 }
                 catch (e) {
