@@ -285,38 +285,38 @@ async function createWindow() {
                 response.on('data', (chunk) => chunks.push(chunk));
                 response.on('end', () => {
                     try {
+                        let modifiedResponse = null;
                         overrideResponses.forEach(x => {
-                            if (x.headers != []) {
-                                x.headers.forEach(y => {
-                                    if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && x.method.toLowerCase() == req.method.toLowerCase() && response.headers[y.name.toLowerCase()] && ((y.includes && response.headers[y.name.toLowerCase()].toLowerCase().includes(y.value.toLowerCase())) || response.headers[y.name].toLowerCase() == y.value.toLowerCase())) {
-                                        let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
+                            if (x.method.toLowerCase() == req.method.toLowerCase()) {
+                                if (x.headers != []) {
+                                    x.headers.forEach(y => {
+                                        if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && response.headers[y.name.toLowerCase()] && ((y.includes && response.headers[y.name.toLowerCase()].toLowerCase().includes(y.value.toLowerCase())) || response.headers[y.name].toLowerCase() == y.value.toLowerCase())) {
+                                            x.overrides.forEach(element => {
+                                                if (!modifiedResponse) modifiedResponse = Buffer.concat(chunks).toString()
+                                                modifiedResponse = modifiedResponse.split(element.search).join(element.replace)
+                                            });
+                                            return
+                                        }
+                                    });
+                                }
+                                else {
+                                    if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url)) {
                                         x.overrides.forEach(element => {
+                                            if (!modifiedResponse) modifiedResponse = Buffer.concat(chunks).toString()
                                             modifiedResponse = modifiedResponse.split(element.search).join(element.replace)
                                         });
-                                        callback(new Response(modifiedResponse, {
-                                            status: response.statusCode == 204 ? 200 : response.statusCode,
-                                            statusText: response.statusMessage,
-                                            headers: response.headers,
-                                        }));
-                                        return
                                     }
-                                });
-                            }
-                            else {
-                                if (((x.url.url.includes && req.url.includes(x.url.url)) || x.url.url == req.url) && x.method.toLowerCase() == req.method.toLowerCase()) {
-                                    let modifiedResponse = new TextDecoder().decode(Buffer.concat(chunks), 'utf8');
-                                    x.overrides.forEach(element => {
-                                        modifiedResponse = modifiedResponse.split(element.search).join(element.replace)
-                                    });
-                                    callback(new Response(modifiedResponse, {
-                                        status: response.statusCode == 204 ? 200 : response.statusCode,
-                                        statusText: response.statusMessage,
-                                        headers: response.headers,
-                                    }));
-                                    return
                                 }
                             }
                         });
+                        if (modifiedResponse) {
+                            callback(new Response(modifiedResponse, {
+                                status: response.statusCode == 204 ? 200 : response.statusCode,
+                                statusText: response.statusMessage,
+                                headers: response.headers,
+                            }));
+                            return
+                        }
                     }
                     catch (e) {
                         console.error("Malformed override response settings!", e)
