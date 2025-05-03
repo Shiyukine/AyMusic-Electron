@@ -43,6 +43,9 @@
     "mac": {
       "category": "public.app-category.audio"
     },
+    "extraResources": [
+      ".env"
+    ],
     "win": {
       "verifyUpdateCodeSignature": false,
       "target": [
