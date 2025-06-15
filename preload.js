@@ -125,5 +125,13 @@ contextBridge.exposeInMainWorld("boundobject", {
     },
     haveCookie: (url, name) => {
         return ipcRenderer.sendSync("have-cookie", { url: url, name: name })
+    },
+    getWindowInsets: () => {
+        return JSON.stringify({
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0
+        })
     }
 });
