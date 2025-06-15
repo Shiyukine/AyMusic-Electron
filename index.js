@@ -1,4 +1,4 @@
-const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog, crashReporter } = require('electron');
+const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog, crashReporter, webFrame } = require('electron');
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
@@ -348,7 +348,8 @@ protocol.registerSchemesAsPrivileged([
             standard: true,
             secure: true,
             supportFetchAPI: true,
-            stream: true
+            stream: true,
+            allowServiceWorkers: true,
         }
     }
 ])
