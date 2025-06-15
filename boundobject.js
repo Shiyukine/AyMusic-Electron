@@ -4,7 +4,7 @@ const url = require('url');
 var fs = require('fs');
 var { configUpdate, searchUpdates } = require("./update.js")
 var { configLogs } = require("./logger.js")
-const DiscordRPC = require('./discord-rpc');
+const DiscordRPC = require('./plugins/discordjs-RPC');
 var { adblockList, addBlockRequest } = require("./adblock.js")
 
 var codeInjecter = []
