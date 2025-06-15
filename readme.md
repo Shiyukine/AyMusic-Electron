@@ -5,8 +5,9 @@ Electron application for AyMusic
 1. Install node
 2. `npm install`
 3. `git restore .` (important, will make musics working)
-4. `npm start`
-5. If the app doesn't launch with `npm start`, then launch the app with `npm run startFix`
+4. In `res/main.js`, modify the line `87` to `if (true)` to use our public production server
+5. `npm start`
+6. If the app doesn't launch with `npm start`, then launch the app with `npm run startFix`
 
 ### Use Spotify
 1. Install Python 
@@ -20,7 +21,6 @@ Electron application for AyMusic
 
 ## How to do a release build for Windows
 1. Install Python 
-2. Change the condition in the `if` in the file `res\class\update.js` to `true` to avoid problems with updates
 3. Create file named `.env` in the root folder
 4. Install castlabs's EVS: `python3 -m pip install --upgrade castlabs-evs` (necessary to use Spotify)
 5. Connect to your EVS account: `python3 -m castlabs_evs.account reauth` or `python3 -m castlabs_evs.account signup`
@@ -29,13 +29,13 @@ Electron application for AyMusic
 
 ## How to do a release build for Linux
 1. Install Python
-2. Change the condition in the `if` in the file `res\class\update.js` to `true` to avoid problems with updates
 3. Create file named `.env` in the root folder
 4. `npm run buildLinux`
 
-__Note:__
-WebAssets are [here](https://github.com/Shiyukine/AyMusic-WebAssets)
+## Repos used
+- [AyMusic's WebAssets](https://github.com/Shiyukine/AyMusic-WebAssets)
+- [AketsukyUpdater for Windows](https://github.com/Shiyukine/AketsukyUpdater)
+- [Fork of discordJS/RPC](https://github.com/Shiyukine/discordjs-RPC)
 
-AketsukyUpdater for Windows is [here](https://github.com/Shiyukine/AketsukyUpdater)
-
-Repo for the Android application: https://github.com/Shiyukine/AyMusic-Android
+## Other repos
+- [Android application of AyMusic](https://github.com/Shiyukine/AyMusic-Android)
