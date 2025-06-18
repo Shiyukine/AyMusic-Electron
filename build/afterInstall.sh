@@ -1,12 +1,15 @@
 #!/bin/bash
 
 if [ $(getent group aymusic) ]; then
-  echo "group exists."
-  pkexec bash -c "usermod -aG aymusic $USER && setfacl -Rm g:aymusic:rwX /opt/aymusic/"
+  echo "-"
 else
-  echo "group does not exist."
-  pkexec bash -c "groupadd aymusic && usermod -aG aymusic $USER && setfacl -Rm g:aymusic:rwX /opt/aymusic/"
-  echo "Group aymusic created and user added."
+  groupadd aymusic
 fi
+usermod -aG aymusic $USER
 setfacl -Rm g:aymusic:rwX /opt/aymusic/
+# exec newgrp aymusic
+# exec newgrp $USER
 pkexec bash -c "chmod 4775 /opt/aymusic/chrome-sandbox"
+echo "After install script executed successfully."
+echo "Please log out and log back in to apply group changes."
+echo "You can also run 'newgrp aymusic' to apply group changes immediately."
