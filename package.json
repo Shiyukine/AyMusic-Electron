@@ -68,10 +68,12 @@
     },
     "pacman": {
       "afterInstall": "./build/afterInstall.sh",
+      "afterRemove": "./build/afterRemove.sh",
       "maintainer": "Shiyukine <aketsuky@gmail.com>"
     },
     "deb": {
       "afterInstall": "./build/afterInstall.sh",
+      "afterRemove": "./build/afterRemove.sh",
       "maintainer": "Shiyukine <aketsuky@gmail.com>"
     },
     "publish": {
