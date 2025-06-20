@@ -1,6 +1,13 @@
 #!/bin/bash
 #trap '' HUP SIGINT SIGTERM EXIT
 
+if [ $(getent group aymusic) ]; then
+  echo "group exists."
+else
+  echo "group does not exist."
+  pkexec bash -c "groupadd aymusic && usermod -aG aymusic $USER && setfacl -Rm g:aymusic:rwX /opt/aymusic/"
+fi
+
 movefiles=false;
 refreshed=false;
 app=none;
@@ -50,8 +57,8 @@ else
         #(set -m; $newstr$app &)
         #$newstr$app
         #$SHELL
+        chmod 4775 $newstr/chrome-sandbox
         chmod +x $newstr/aymusic
-        pkexec chown -R root:root $newstr
         $newstr$app < /dev/null &> /dev/null & disown || $newstr$app --no-sandbox --no-zygote < /dev/null &> /dev/null & disown
         #gnome-terminal echo
         #gnome-terminal -- bash -c "echo {$app}; $SHELL"

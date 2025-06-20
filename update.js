@@ -18,8 +18,8 @@ async function getFiles(dir) {
 
 var configUpdate = {
     servUrl: "",
-    versionName: "0.3.3",
-    versionCode: 10,
+    versionName: "0.3.5",
+    versionCode: 12,
     isRelease: false,
     closing: false
 }
@@ -105,17 +105,6 @@ function dlFileNotTemp(win, appPath, dlPathServ, platform, file) {
     })
 }
 
-let alreadyFixPerm = false
-
-function fixPerm(appPath) {
-    var platform = process.platform
-    if (platform != "linux") return
-    console.log(appPath)
-    if (alreadyFixPerm) return
-    require("child_process").execSync("pkexec chown -R \"$USER\":\"$USER\" \"" + appPath + "\"");
-    alreadyFixPerm = true
-}
-
 const searchUpdates = async (event) => {
     process.noAsar = true
     var platform = process.platform
@@ -168,7 +157,7 @@ const searchUpdates = async (event) => {
         if (platform == "linux") {
             appPath = path.dirname(app.getPath("exe"))
             if (!fs.existsSync(appPath + "/AketsukyUpdater.sh") && configUpdate.isRelease) {
-                fixPerm(appPath)
+                //require('child_process').execSync("pkexec setfacl -Rm g:aymusic:rwX /opt/aymusic/");
                 await dlFileNotTemp(win, appPath, dlPathServ, platform, "AketsukyUpdater.sh")
                 /*win.webContents.send('update-state-change', {
                     step: -2,
@@ -181,8 +170,7 @@ const searchUpdates = async (event) => {
                 return
             }
             if (fs.existsSync(appPath + "/AketsukyUpdaterTEMP.sh")) {
-                if (alreadyFixPerm) fs.rmSync(appPath + "/AketsukyUpdaterTEMP.sh")
-                else require("child_process").execSync("pkexec rm \"" + appPath + "/AketsukyUpdaterTEMP.sh\"");
+                fs.rmSync(appPath + "/AketsukyUpdaterTEMP.sh")
             }
         }
         let files = await getFiles(appPath)
@@ -231,7 +219,7 @@ const searchUpdates = async (event) => {
             })
         }
         else {
-            fixPerm(appPath);
+            //require('child_process').execSync("pkexec setfacl -Rm g:aymusic:rwX /opt/aymusic/");
             for (let i in filesToUpdate) {
                 let file = filesToUpdate[i]
                 mkdirp(appPath + "/DownloadTemp/")
@@ -323,7 +311,7 @@ const searchUpdates = async (event) => {
         console.error(e)
         win.webContents.send('update-state-change', {
             step: -2,
-            error: e,
+            error: e + "\n" + (platform == "linux" ? "If you have problems with permissions, try to log-out and log-in again, or restart your computer." : ""),
             file: null,
             cur: 0,
             max: 1

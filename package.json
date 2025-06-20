@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Created by Shiyukine from Aketsuky. AyMusic allows you to create playlists with music on Spotify, Youtube, Deezer, Soundclound, Bandcamp and locally in one platform.",
   "main": "index.js",
-  "homepage": "https://aketsuky.com/projects/AyMusic.php",
+  "homepage": "https://aketsuky.net/projects/AyMusic.php",
   "displayName": "AyMusic",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,7 +16,7 @@
   },
   "author": {
     "email": "aketsuky@gmail.com",
-    "url": "https://aketsuky.com",
+    "url": "https://aketsuky.net",
     "name": "Shiyukine - Aketsuky™"
   },
   "license": "ISC",
@@ -63,7 +63,18 @@
         "Comment": "Your music in a one platform."
       },
       "artifactName": "AyMusic-${version}.${ext}",
-      "synopsis": "Your music in a one platform."
+      "synopsis": "Your music in a one platform.",
+      "maintainer": "Shiyukine <aketsuky@gmail.com>"
+    },
+    "pacman": {
+      "afterInstall": "./build/afterInstall.sh",
+      "afterRemove": "./build/afterRemove.sh",
+      "maintainer": "Shiyukine <aketsuky@gmail.com>"
+    },
+    "deb": {
+      "afterInstall": "./build/afterInstall.sh",
+      "afterRemove": "./build/afterRemove.sh",
+      "maintainer": "Shiyukine <aketsuky@gmail.com>"
     },
     "publish": {
       "provider": "github"

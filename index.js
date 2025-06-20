@@ -1,4 +1,4 @@
-const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog, crashReporter } = require('electron');
+const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog, crashReporter, webFrame } = require('electron');
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
@@ -14,7 +14,7 @@ app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
 app.setPath('crashDumps', app.getPath("appData") + "/AyMusic/CrashDumps/");
 app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
 crashReporter.start({ uploadToServer: false })
-require('dotenv').config()
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 var maximize = false
 try {
@@ -348,7 +348,8 @@ protocol.registerSchemesAsPrivileged([
             standard: true,
             secure: true,
             supportFetchAPI: true,
-            stream: true
+            stream: true,
+            allowServiceWorkers: true,
         }
     }
 ])

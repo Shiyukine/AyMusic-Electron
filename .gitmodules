@@ -1,3 +1,7 @@
 [submodule "AyMusic-WebAssets"]
 	path = res
 	url = https://github.com/Shiyukine/AyMusic-WebAssets
+
+[submodule "discordjs-RPC"]
+	path = plugins/discordjs-RPC
+	url = https://github.com/Shiyukine/discordjs-RPC
