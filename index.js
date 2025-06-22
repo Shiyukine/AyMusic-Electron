@@ -194,21 +194,28 @@ async function createWindow() {
     modifySession.cookies.on("changed", (e, cookie, cause, removed) => {
         let cookieUrl = "http" + (cookie.secure ? "s" : "") + "://" + (cookie.domain.startsWith(".") ? cookie.domain.substring(1) : cookie.domain) + cookie.path
         //console.log("Cookie changed", cookie.name, cookieUrl)
-        session.defaultSession.cookies.set({
-            url: cookieUrl,
-            name: cookie.name,
-            value: cookie.value,
-            domain: cookie.domain,
-            httpOnly: cookie.httpOnly,
-            secure: cookie.secure,
-            expirationDate: cookie.expirationDate,
-            sameSite: cookie.sameSite,
-            hostOnly: cookie.hostOnly,
-            session: cookie.session,
-            path: cookie.path,
-        }).catch((e) => {
-            console.error("Unable to set cookie", cookie.name, cookieUrl, e)
-        })
+        if (removed) {
+            session.defaultSession.cookies.remove(cookieUrl, cookie.name).catch((e) => {
+                console.error("Unable to remove cookie", cookie.name, cookieUrl, e)
+            })
+        }
+        else {
+            session.defaultSession.cookies.set({
+                url: cookieUrl,
+                name: cookie.name,
+                value: cookie.value,
+                domain: cookie.domain,
+                httpOnly: cookie.httpOnly,
+                secure: cookie.secure,
+                expirationDate: cookie.expirationDate,
+                sameSite: cookie.sameSite,
+                hostOnly: cookie.hostOnly,
+                session: cookie.session,
+                path: cookie.path,
+            }).catch((e) => {
+                console.error("Unable to set cookie", cookie.name, cookieUrl, e)
+            })
+        }
         session.defaultSession.cookies.flushStore()
     })
     ElectronBlocker.fromLists(net.fetch, [
