@@ -6,6 +6,7 @@ var { configUpdate, searchUpdates } = require("./update.js")
 var { configLogs } = require("./logger.js")
 const DiscordRPC = require('./plugins/discordjs-RPC');
 var { adblockList, addBlockRequest } = require("./adblock.js")
+var { addLogs } = require("./logger.js")
 
 var codeInjecter = []
 var overrideResponses = []
@@ -185,6 +186,10 @@ const callBoundObject = () => {
                 win.close()
             }
         })
+        win.webContents.on('console-message', (event, level, message, line, sourceId) => {
+            //console.log('renderer console.%s: %s', ['debug', 'info', 'warn', 'error'][level], message);
+            addLogs(level, message, line, sourceId)
+        });
         win.removeMenu()
         //let ua = win.webContents.userAgent;
         //ua = ua.replace(/aymusic\/[0-9\.-]*/, '');

@@ -279,11 +279,11 @@ async function createWindow() {
 
             request.on('redirect', (statusCode, method, redirectUrl, responseHeaders) => {
                 console.log('redirecting to:', redirectUrl);
+                //request.followRedirect();
                 callback(new Response(null, {
                     status: statusCode,
                     headers: responseHeaders,
                 }));
-                request.followRedirect();
             });
 
             request.on('response', (response) => {
