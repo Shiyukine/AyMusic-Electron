@@ -258,7 +258,7 @@ async function createWindow() {
                         clientToken["Spotify"] = value.split("Bearer ")[1]
                     }
                 }
-                if (req.url.includes("https://api-auth.soundcloud.com/oauth/authorize")) {
+                if (req.url.includes("https://api-auth.soundcloud.com/oauth")) {
                     let uri = new URL(req.url)
                     clientToken["Soundcloud"] = uri.searchParams.get("client_id")
                 }
