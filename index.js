@@ -21,7 +21,7 @@ try {
     let settings = fs.readFileSync(app.getPath('appData') + "/AyMusic/UserSettings.json", "utf-8")
     settings = JSON.parse(settings)
     if (settings["other_hwacc"] === false) app.disableHardwareAcceleration();
-    if (settings["other_maximize"] === true) maximize = true
+    if (settings["other_maximize"] === true && process.platform !== "darwin") maximize = true
 }
 catch { }
 
@@ -47,6 +47,7 @@ async function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
+        titleBarStyle: process.platform == "darwin" ? "hiddenInset" : "default",
         frame: process.platform != "win32",
         useContentSize: true,
         webPreferences: {
@@ -194,7 +195,7 @@ async function createWindow() {
     modifySession.cookies.on("changed", (e, cookie, cause, removed) => {
         let cookieUrl = "http" + (cookie.secure ? "s" : "") + "://" + (cookie.domain.startsWith(".") ? cookie.domain.substring(1) : cookie.domain) + cookie.path
         //console.log("Cookie changed", cookie.name, cookieUrl)
-        if (removed) {
+        if (removed && cause != "overwrite") {
             session.defaultSession.cookies.remove(cookieUrl, cookie.name).catch((e) => {
                 console.error("Unable to remove cookie", cookie.name, cookieUrl, e)
             })
