@@ -11,8 +11,10 @@ plat = sys.argv[1]
 platform = ""
 if plat == "win":
     platform = "windows"
-if plat == "linux":
+elif plat == "linux":
     platform = "linux"
+else:
+    platform = plat
 mainPath = "./dist/" + plat + "-unpacked/"
 for path, subdirs, files in os.walk(mainPath):
     for name in files:

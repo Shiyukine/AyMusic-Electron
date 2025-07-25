@@ -1,20 +1,28 @@
+require('dotenv').config();
 const { notarize } = require('@electron/notarize')
 
 exports.default = function (context) {
   // Skip if not mac build
   if (process.platform === 'darwin') {
-    console.log('Notarizing')
-    // Get contex vars
+    // Get context vars
     const appName = context.packager.appInfo.productFilename
     const appDir = context.appOutDir
 
-    // Notarize
-    return notarize({
-      appBundleId: 'com.aketsuky.aymusic',
-      appPath: `${appDir}/${appName}.app`,
-      appleId: process.env.appleId,
-      appleIdPassword: process.env.appleIdPassword
-    })
+    if(process.env.APPLETEAMID && process.env.APPLEID && process.env.APPLEIDPASS) {
+      console.log('Notarizing')
+      // Notarize
+      return notarize({
+        appBundleId: 'com.aketsuky.aymusic',
+        appPath: `${appDir}/${appName}.app`,
+        tool: 'notarytool',
+        teamId: process.env.APPLETEAMID,
+        appleId: process.env.APPLEID,
+        appleIdPassword: process.env.APPLEIDPASS,
+      })
+    }
+    else {
+      console.log('Skipping notarization, APPLETEAMID, APPLEID or APPLEIDPASS is not set')
+    }
   } else if (process.platform === 'win32') {
     // VMP sign via EVS
     const { execSync } = require('child_process')

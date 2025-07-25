@@ -11,3 +11,4 @@ node_modules/@cliqz/adblocker-electron/dist/commonjs/*
 !node_modules/@cliqz/adblocker-electron/dist/commonjs/index.js
 .webpack/
 .env
+**/.DS_Store

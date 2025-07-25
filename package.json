@@ -41,7 +41,57 @@
     "afterPack": "./build/afterPack.js",
     "afterSign": "./build/afterSign.js",
     "mac": {
-      "category": "public.app-category.audio"
+      "category": "public.app-category.audio",
+      "extraResources": [
+        {
+          "from": "./build/updaters/mac",
+          "to": "updaters"
+        }
+      ],
+      "target": [
+        "dmg"
+      ]
+    },
+    "dmg": {
+      "title": "AyMusic",
+      "icon": "build/driveicon.icns",
+      "artifactName": "AyMusic.${ext}",
+      "iconSize": 115,
+      "window": {
+        "width": 602,
+        "height": 358
+      },
+      "contents": [
+        {
+          "x": 375,
+          "y": 170,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 35,
+          "y": 170,
+          "type": "file"
+        },
+        {
+          "x": 0,
+          "y": 500,
+          "type": "dir",
+          "name": ".background"
+        },
+        {
+          "x": 120,
+          "y": 500,
+          "type": "file",
+          "name": ".VolumeIcon.icns"
+        },
+        {
+          "x": 240,
+          "y": 500,
+          "type": "dir",
+          "name": ".fseventsd"
+        }
+      ]
     },
     "win": {
       "verifyUpdateCodeSignature": false,
