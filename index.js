@@ -174,6 +174,20 @@ async function createWindow() {
                 mainWindow.webContents.executeJavaScript("window.forceRestart = true")
             }
         });
+        let sigPath = "";
+        if(process.platform == "darwin") {
+            sigPath = app.getPath("exe");
+            sigPath = sigPath.split("MacOS/aymusic").join("Frameworks/Electron Framework.framework/Versions/A/Resources/Electron Framework.sig")
+            sigPath = sigPath.split("MacOS/Electron").join("Frameworks/Electron Framework.framework/Versions/A/Resources/Electron Framework.sig")
+        }
+        else if(process.platform == "win32") {
+            sigPath = app.getPath("exe");
+            sigPath = sigPath.split("AyMusic.exe").join("aymusic.exe.sig")
+            sigPath = sigPath.split("electron.exe").join("electron.exe.sig")
+        }
+        if(sigPath !== "" && !fs.existsSync(sigPath)) {
+            mainWindow.webContents.executeJavaScript("window.noDRM = true; newError('Signature file not found', 'DRM is not properly configured; some platforms may not work. Please sign the app using castlab\\'s EVS.')")
+        }
     });
     mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
         //console.log('renderer console.%s: %s', ['debug', 'info', 'warn', 'error'][level], message);

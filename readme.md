@@ -15,7 +15,9 @@ Electron application for AyMusic
 1. Install Python 
 2. Install castlabs's EVS: `python3 -m pip install --upgrade castlabs-evs` (necessary to use Spotify)
 3. Connect to your EVS account: `python3 -m castlabs_evs.account reauth` or `python3 -m castlabs_evs.account signup`
-4. `python -m castlabs_evs.vmp sign-pkg .\node_modules\electron\dist\`
+4. Sign the app:
+    - On Windows: `python -m castlabs_evs.vmp sign-pkg .\node_modules\electron\dist\`
+    - On macOS: `python3 -m castlabs_evs.vmp sign-pkg ./node_modules/electron/dist/`
 
 ### Use Discord RPC (for Windows)
 1. Create file named `.env` in the root folder
