@@ -35,7 +35,7 @@ done;
 
 if [ $refreshed = false ];
 then
-    echo "To fully start app, we need to detash this child to the parent process. Restarting..."
+    echo "To fully start app, we need to detach this child to the parent process. Restarting..."
     #(set -m; $0 --move-files --app $app --refreshed &)
     #$0 --move-files --app $app --refreshed 
     $0 "$@" --refreshed < /dev/null &> /dev/null & disown

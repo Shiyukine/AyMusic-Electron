@@ -47,12 +47,13 @@ function mkdirp(dir) {
 }
 
 function dlFile(win, appPath, dlPathServ, platform, file) {
-    return new Promise(async resolve => {
+    return new Promise(async (resolve, reject) => {
         try {
             console.log(dlPathServ.split("%platform%").join(platform).split("%file%").join(file))
             mkdirp(appPath + "/DownloadTemp/" + file.split("/").slice(0, -1).join("/") + "/")
             let dl = await electronDl.download(win, dlPathServ.split("%platform%").join(platform).split("%file%").join(file), {
                 directory: appPath + "/DownloadTemp/" + file.split("/").slice(0, -1).join("/") + "/",
+                filename: file.split("/").slice(-1)[0],
                 onTotalProgress: (e) => {
                     win.webContents.send('update-state-change', {
                         step: 4,
@@ -68,13 +69,8 @@ function dlFile(win, appPath, dlPathServ, platform, file) {
             })
         }
         catch (e) {
-            win.webContents.send('update-state-change', {
-                step: -2,
-                error: e,
-                file: null,
-                cur: 0,
-                max: 1
-            })
+            console.error(e, file)
+            reject(e)
         }
     })
 }
@@ -173,7 +169,30 @@ const searchUpdates = async (event) => {
                 fs.rmSync(appPath + "/AketsukyUpdaterTEMP.sh")
             }
         }
+        if (platform == "macos") {
+            appPath = path.dirname(path.join(app.getPath("exe"), "../"))
+            if (!fs.existsSync(appPath + "/Resources/updater/updater.command") && configUpdate.isRelease) {
+                //require('child_process').execSync("pkexec setfacl -Rm g:aymusic:rwX /opt/aymusic/");
+                await dlFileNotTemp(win, appPath + "/Resources/updater/", dlPathServ, platform, "updater.command")
+                /*win.webContents.send('update-state-change', {
+                    step: -2,
+                    error: "Some required files are not available to update the app. Please resintall this app.",
+                    file: null,
+                    cur: 0,
+                    max: 1
+                })*/
+                await searchUpdates(event)
+                return
+            }
+            if (fs.existsSync(appPath + "/Resources/updater/updaterTEMP.command")) {
+                fs.rmSync(appPath + "/Resources/updater/updaterTEMP.command")
+            }
+        }
         let files = await getFiles(appPath)
+        if(platform == "macos") {
+            // filter symlinks
+            files = files.filter(file => !fs.lstatSync(file).isSymbolicLink());
+        }
         let clientJsonOut = {}
         for (let i in files) {
             let file = files[i]
@@ -194,6 +213,7 @@ const searchUpdates = async (event) => {
                     cur: 0,
                     max: 1
                 })
+                console.error(e, file)
             }
         }
         console.log(JSON.stringify(clientJsonOut))
@@ -277,6 +297,33 @@ const searchUpdates = async (event) => {
                     detached: true,
                     //stdio: 'ignore',
                     shell: "/bin/bash"
+                });
+                bat.unref()
+                bat.stdout.on("data", (data) => {
+                    console.log(data.toString())
+                });
+
+                bat.stderr.on("data", (err) => {
+                    console.log(err.toString())
+                });
+
+                bat.on("exit", (code) => {
+                    console.log(code)
+                    configUpdate.closing = true
+                    win.close()
+                    //process.kill(process.pid)
+                });
+            }
+            else if (platform == "macos") {
+                fs.copyFileSync(appPath + "/Resources/updater/updater.command", appPath + "/Resources/updater/updaterTEMP.command")
+                const {spawn, execSync} = require("child_process");
+                execSync("chmod +x \"" + appPath + "/Resources/updater/updaterTEMP.command" + "\"");
+                let bat = spawn(appPath + "/Resources/updater/updaterTEMP.command", [
+                    "--move-files",
+                    "--app",
+                    "aymusic",
+                ], {
+                    detached: true
                 });
                 bat.unref()
                 bat.stdout.on("data", (data) => {

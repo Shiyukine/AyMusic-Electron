@@ -9,6 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "startFix": "electron . --no-sandbox --no-zygote",
+    "startFixMac": "cd node_modules/electron && rm -r dist && npm run postinstall && echo \"Now the application should run with 'npm start'\" && cd ../.. && electron .",
     "buildMac": "electron-builder -m",
     "buildWin": "electron-builder -w",
     "buildLinux": "electron-builder -l",
@@ -26,11 +27,11 @@
   },
   "dependencies": {
     "@cliqz/adblocker-electron": "^1.31.3",
-    "discord-rpc": "^4.0.1",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.6.1",
     "electron-dl": "^3.5.2",
-    "electron-is-packaged": "^1.0.2",
-    "eslint": "^9.18.0"
+    "eslint": "^9.32.0",
+    "node-fetch": "^2.6.1",
+    "ws": "^7.3.1"
   },
   "build": {
     "appId": "com.aketsuky.aymusic",
@@ -45,7 +46,7 @@
       "extraResources": [
         {
           "from": "./build/updaters/mac",
-          "to": "updaters"
+          "to": "updater"
         }
       ],
       "target": [

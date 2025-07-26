@@ -7,7 +7,7 @@ var { initLogs, addLogs } = require("./logger.js")
 var { ElectronBlocker } = require("@cliqz/adblocker-electron");
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
 var { configUpdate } = require("./update.js");
-const isPackaged = require('electron-is-packaged').isPackaged;
+const isPackaged = app.isPackaged;
 var { adblockList, isBadUrl } = require("./adblock.js")
 
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
