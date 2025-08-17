@@ -2,7 +2,7 @@ const { app, components, BrowserWindow, session, protocol, net, webFrameMain, we
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
-var { callBoundObject, codeInjecter, clientToken, overrideResponses } = require("./boundobject.js")
+var { callBoundObject, codeInjecter, clientToken, overrideResponses, iframeStatus } = require("./boundobject.js")
 var { initLogs, addLogs } = require("./logger.js")
 var { ElectronBlocker } = require("@cliqz/adblocker-electron");
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
@@ -175,17 +175,17 @@ async function createWindow() {
             }
         });
         let sigPath = "";
-        if(process.platform == "darwin") {
+        if (process.platform == "darwin") {
             sigPath = app.getPath("exe");
             sigPath = sigPath.split("MacOS/aymusic").join("Frameworks/Electron Framework.framework/Versions/A/Resources/Electron Framework.sig")
             sigPath = sigPath.split("MacOS/Electron").join("Frameworks/Electron Framework.framework/Versions/A/Resources/Electron Framework.sig")
         }
-        else if(process.platform == "win32") {
+        else if (process.platform == "win32") {
             sigPath = app.getPath("exe");
             sigPath = sigPath.split("AyMusic.exe").join("aymusic.exe.sig")
             sigPath = sigPath.split("electron.exe").join("electron.exe.sig")
         }
-        if(sigPath !== "" && !fs.existsSync(sigPath)) {
+        if (sigPath !== "" && !fs.existsSync(sigPath)) {
             mainWindow.webContents.executeJavaScript("window.noDRM = true; newError('Signature file not found', 'DRM is not properly configured; some platforms may not work. Please sign the app using castlab\\'s EVS.')")
         }
     });
@@ -257,6 +257,7 @@ async function createWindow() {
                 }))
                 return
             }
+            iframeStatus[req.url] = 0 // 0 - not loaded, 1 - loaded, 2 - error
             const request = net.request({
                 method: req.method,
                 url: req.url,
@@ -288,6 +289,7 @@ async function createWindow() {
             })
 
             request.on('error', (error) => {
+                iframeStatus[req.url] = 2 // error
                 if (error.message.includes("net::ERR_BLOCKED_BY_CLIENT")) return
                 console.error('request error:', error);
             });
@@ -306,6 +308,7 @@ async function createWindow() {
 
                 response.on('data', (chunk) => chunks.push(chunk));
                 response.on('end', () => {
+                    iframeStatus[req.url] = 1 // loaded
                     try {
                         let modifiedResponse = null;
                         overrideResponses.forEach(x => {

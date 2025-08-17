@@ -85,6 +85,9 @@ contextBridge.exposeInMainWorld("boundobject", {
     registerIframeUrl: (url, script) => {
         ipcRenderer.send("register-frame-url", { url: url, code: script })
     },
+    getIframeStatus: (url) => {
+        return ipcRenderer.sendSync("get-iframe-status", { url: url })
+    },
     registerOverrideResponse: (val) => {
         ipcRenderer.send("register-override-response", { json: val })
     },

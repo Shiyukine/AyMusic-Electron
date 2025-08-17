@@ -11,6 +11,7 @@ var { addLogs } = require("./logger.js")
 var codeInjecter = []
 var overrideResponses = []
 var clientToken = {}
+var iframeStatus = {}
 
 function mkdirp(dir) {
     if (fs.existsSync(dir)) { return true }
@@ -111,6 +112,12 @@ const callBoundObject = () => {
             codeInjecter.splice(i, 1)
         }
         codeInjecter.push(val)
+    })
+
+    ipcMain.on('get-iframe-status', async (event, args, options) => {
+        let url = args["url"]
+        let status = iframeStatus[url] || 0
+        event.returnValue = status
     })
 
     ipcMain.on('register-override-response', async (event, args, options) => {
@@ -294,3 +301,4 @@ module.exports.callBoundObject = callBoundObject;
 module.exports.codeInjecter = codeInjecter;
 module.exports.clientToken = clientToken;
 module.exports.overrideResponses = overrideResponses;
+module.exports.iframeStatus = iframeStatus;
