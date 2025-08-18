@@ -180,10 +180,61 @@ const callBoundObject = () => {
         var baseUrl = args["baseUrl"]
         var closeUrl = args["closeUrl"]
         var filter = args["useIncludeUrlFilter"]
+        let loginSession = session.fromPartition("persist:login")
+        let modifySession = session.fromPartition("persist:modify")
+        loginSession.cookies.on("changed", (e, cookie, cause, removed) => {
+            let cookieUrl = "http" + (cookie.secure ? "s" : "") + "://" + (cookie.domain.startsWith(".") ? cookie.domain.substring(1) : cookie.domain) + cookie.path
+            //console.log("Cookie changed", cookie.name, cookieUrl)
+            if (removed && cause != "overwrite") {
+                session.defaultSession.cookies.remove(cookieUrl, cookie.name).catch((e) => {
+                    console.error("Unable to remove cookie", cookie.name, cookieUrl, e)
+                })
+                modifySession.cookies.remove(cookieUrl, cookie.name).catch((e) => {
+                    console.error("Unable to remove cookie", cookie.name, cookieUrl, e)
+                })
+            }
+            else {
+                session.defaultSession.cookies.set({
+                    url: cookieUrl,
+                    name: cookie.name,
+                    value: cookie.value,
+                    domain: cookie.domain,
+                    httpOnly: cookie.httpOnly,
+                    secure: cookie.secure,
+                    expirationDate: cookie.expirationDate,
+                    sameSite: cookie.sameSite,
+                    hostOnly: cookie.hostOnly,
+                    session: cookie.session,
+                    path: cookie.path,
+                }).catch((e) => {
+                    console.error("Unable to set cookie", cookie.name, cookieUrl, e)
+                })
+                modifySession.cookies.set({
+                    url: cookieUrl,
+                    name: cookie.name,
+                    value: cookie.value,
+                    domain: cookie.domain,
+                    httpOnly: cookie.httpOnly,
+                    secure: cookie.secure,
+                    expirationDate: cookie.expirationDate,
+                    sameSite: cookie.sameSite,
+                    hostOnly: cookie.hostOnly,
+                    session: cookie.session,
+                    path: cookie.path,
+                }).catch((e) => {
+                    console.error("Unable to set cookie", cookie.name, cookieUrl, e)
+                })
+            }
+            session.defaultSession.cookies.flushStore()
+            modifySession.cookies.flushStore()
+        })
         const win = new BrowserWindow({
             width: 800,
             height: 600,
-            icon: __dirname + "/res/favicon.ico"
+            icon: __dirname + "/res/favicon.ico",
+            webPreferences: {
+                session: loginSession
+            }
             //titleBarOverlay: true
         });
         win.webContents.on("did-navigate", (event, url, httpResponseCode, httpStatusText) => {
@@ -202,7 +253,16 @@ const callBoundObject = () => {
         //ua = ua.replace(/aymusic\/[0-9\.-]*/, '');
         //ua = ua.replace(/Electron\/*/, '');
         //win.webContents.userAgent = ua;
-        win.loadURL(baseUrl/*, { userAgent: 'Chrome' }*/)
+        win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+            if (baseUrl.includes("soundcloud.com")) {
+                details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36';
+            }
+            else if (details.url.includes("google.com") && !details.referrer.includes("deezer.com")) {
+                details.requestHeaders['User-Agent'] = 'Chrome';
+            }
+            callback({ cancel: false, requestHeaders: details.requestHeaders });
+        });
+        win.loadURL(baseUrl, /*{ userAgent: "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36" }*/)
     })
 
     ipcMain.handle('save-cache', async (event, args, options) => {
