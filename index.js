@@ -12,7 +12,7 @@ var { adblockList, isBadUrl } = require("./adblock.js")
 
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
 app.setPath('crashDumps', app.getPath("appData") + "/AyMusic/CrashDumps/");
-app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
 crashReporter.start({ uploadToServer: false })
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 

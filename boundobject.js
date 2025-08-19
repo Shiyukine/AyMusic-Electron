@@ -255,7 +255,7 @@ const callBoundObject = () => {
         //win.webContents.userAgent = ua;
         win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
             if (baseUrl.includes("soundcloud.com")) {
-                details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.185 Safari/537.36';
+                details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.7204.168 Safari/537.36';
             }
             else if (details.url.includes("google.com") && !details.referrer.includes("deezer.com")) {
                 details.requestHeaders['User-Agent'] = 'Chrome';
