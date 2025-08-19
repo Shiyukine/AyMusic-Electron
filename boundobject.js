@@ -233,7 +233,7 @@ const callBoundObject = () => {
             height: 600,
             icon: __dirname + "/res/favicon.ico",
             webPreferences: {
-                session: loginSession
+                session: baseUrl.includes("soundcloud.com") ? loginSession : undefined
             }
             //titleBarOverlay: true
         });
