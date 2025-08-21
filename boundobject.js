@@ -255,7 +255,28 @@ const callBoundObject = () => {
         //win.webContents.userAgent = ua;
         win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
             if (baseUrl.includes("soundcloud.com")) {
-                details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.7204.168 Safari/537.36';
+                //details.requestHeaders['User-Agent'] = currentUA;
+                const captchaHeaders = {
+                    'Accept': 'application/json',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br, zstd',
+                    'Connection': 'keep-alive',
+                    //"Sec-Ch-Ua": '"Not)A;Brand";v="8", "Chromium";v="138"',
+                    "Sec-Ch-Ua-Mobile": '?0',
+                    //"Sec-Ch-Ua-Platform": '"macOS"',
+                    'Sec-Fetch-Dest': 'empty',
+                    'Sec-Fetch-Mode': 'cors',
+                    'Sec-Fetch-Site': 'same-site',
+                    'Sec-Fetch-User': '?1',
+                    'Sec-Gpc': '1',
+                    //"Pragma": "no-cache",
+                    //'Cache-Control': 'no-cache'
+                }
+                
+                // Override headers for captcha requests
+                Object.keys(captchaHeaders).forEach(key => {
+                    details.requestHeaders[key] = captchaHeaders[key];
+                });
             }
             else if (details.url.includes("google.com") && !details.referrer.includes("deezer.com")) {
                 details.requestHeaders['User-Agent'] = 'Chrome';

@@ -12,7 +12,11 @@ var { adblockList, isBadUrl } = require("./adblock.js")
 
 app.setPath('userData', app.getPath("appData") + "/AyMusic/Cache/WebCache/");
 app.setPath('crashDumps', app.getPath("appData") + "/AyMusic/CrashDumps/");
-app.userAgentFallback = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+let currentUA = app.userAgentFallback;
+currentUA = currentUA.replace(/aymusic\/[0-9\.\s]*/, '');
+currentUA = currentUA.replace(/Electron\/[0-9\.\s]*/, '');
+console.log(currentUA);
+app.userAgentFallback = currentUA;
 crashReporter.start({ uploadToServer: false })
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
@@ -264,8 +268,10 @@ async function createWindow() {
                 session: modifySession,
                 redirect: 'manual',
                 useSessionCookies: true,
+                referrerPolicy: req.referrerPolicy,
                 cache: !isPackaged ? "no-cache" : "default",
                 credentials: 'include',
+                host: new URL(req.url).host,
             });
 
             req.headers.forEach((value, key, parent) => {
@@ -280,7 +286,7 @@ async function createWindow() {
                 }
                 if (key.toLowerCase() == "User-Agent".toLowerCase()) {
                     if (!req.url.includes("accounts.google.com") || req.referrer == "https://account.deezer.com/")
-                        value = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+                        value = currentUA
                     else {
                         value = "Chrome"
                     }
