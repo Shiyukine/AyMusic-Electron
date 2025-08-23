@@ -1,15 +1,18 @@
 require('dotenv').config();
-const { notarize } = require('@electron/notarize')
 
 exports.default = function (context) {
-  // Skip if not mac build
+  const { execSync } = require('child_process')
   if (process.platform === 'darwin') {
+    console.log('Creating output md5')
+    execSync('python3 ./build/md5output.py ' + [null, "mac-universal-x64-temp", null, "mac-universal-arm64-temp", "mac-universal"][context.arch] + ' -B')
+    console.log('md5 complete')
     // Get context vars
     const appName = context.packager.appInfo.productFilename
     const appDir = context.appOutDir
 
-    if(process.env.APPLETEAMID && process.env.APPLEID && process.env.APPLEIDPASS) {
+    if (process.env.APPLETEAMID && process.env.APPLEID && process.env.APPLEIDPASS) {
       console.log('Notarizing')
+      const { notarize } = require('@electron/notarize')
       // Notarize
       return notarize({
         appBundleId: 'com.aketsuky.aymusic',
@@ -21,7 +24,7 @@ exports.default = function (context) {
       })
     }
     else {
-      console.log('Skipping notarization, APPLETEAMID, APPLEID or APPLEIDPASS is not set')
+      console.log('Skipping notarization, APPLETEAMID, APPLEID and APPLEIDPASS are not set')
     }
   } else if (process.platform === 'win32') {
     // VMP sign via EVS

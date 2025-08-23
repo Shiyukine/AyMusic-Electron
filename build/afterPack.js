@@ -5,13 +5,17 @@ exports.default = function (context) {
   if (platform == "win32") platform = "win"
   if (platform == "linux") platform = "linux"
   if (process.platform === 'darwin') {
-    // VMP sign via EVS
-    console.log('VMP signing start')
-    execSync('python3 -m castlabs_evs.vmp sign-pkg ./dist/mac ' + context.appOutDir)
-    console.log('VMP signing complete')
-    console.log('Creating output md5')
-    execSync('python3 ./build/md5output.py mac -B')
-    console.log('md5 complete')
+    if (context.arch === 4 /* universal */) {
+      // VMP sign via EVS
+      console.log('VMP signing start')
+      execSync('python3 -m castlabs_evs.vmp sign-pkg ' + context.appOutDir)
+      console.log('VMP signing complete')
+    }
+    else {
+      // removing sig file
+      console.log('rm -f "' + context.appOutDir + '/aymusic.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/Electron Framework.sig"')
+      execSync('rm -f "' + context.appOutDir + '/aymusic.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/Electron Framework.sig"')
+    }
   }
   else if (process.platform === "linux") {
     execSync("cp ./build/updaters/" + platform + "/* ./dist/" + platform + "-unpacked/")
