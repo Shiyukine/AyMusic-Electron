@@ -8,7 +8,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "startFix": "electron . --no-sandbox --no-zygote",
+    "startFix": "unset CHROME_DESKTOP && electron .",
     "startFixMac": "cd node_modules/electron && rm -r dist && npm run postinstall && echo \"Now the application should run with 'npm start'\" && cd ../.. && electron .",
     "buildMac": "electron-builder -m",
     "buildWin": "electron-builder -w",

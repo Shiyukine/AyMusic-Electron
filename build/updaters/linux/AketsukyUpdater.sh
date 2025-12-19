@@ -1,11 +1,13 @@
 #!/bin/bash
-#trap '' HUP SIGINT SIGTERM EXIT
+# AyMusic Updater Script for Linux
+# Do not modify this file or the update process may break.
 
 if [ $(getent group aymusic) ]; then
   echo "group exists."
 else
   echo "group does not exist."
-  pkexec bash -c "groupadd aymusic && usermod -aG aymusic $USER && setfacl -Rm g:aymusic:rwX /opt/aymusic/"
+  # https://youtrack.jetbrains.com/projects/CPP/issues/CPP-45629/Run-debug-with-root-on-Ubuntu-25-with-pkexec-hangs
+  bash -c "ulimit -n 128 && pkexec bash -c 'groupadd aymusic && usermod -aG aymusic $USER && setfacl -Rm g:aymusic:rwX /opt/aymusic/'"
 fi
 
 movefiles=false;
@@ -31,16 +33,11 @@ do
 
 done;
 
-#echo $app
-
 if [ $refreshed = false ];
 then
     echo "To fully start app, we need to detach this child to the parent process. Restarting..."
-    #(set -m; $0 --move-files --app $app --refreshed &)
-    #$0 --move-files --app $app --refreshed 
     $0 "$@" --refreshed < /dev/null &> /dev/null & disown
     exit 0
-    #nohup ./AketsukyUpdater.sh --move-files --app $app --refreshed &
 else
     if [ $movefiles = true ];
     then
@@ -50,19 +47,20 @@ else
         current=$0
         newstr=${current/"AketsukyUpdater.sh"/""}
         newstr=${newstr/"AketsukyUpdaterTEMP.sh"/""}
-        #mv -f DownloadTemp/* ./
         cp -rf $newstr/DownloadTemp/* $newstr/
         rm -rf $newstr/DownloadTemp/
         echo "Updated finished. Launching $app..."
-        #(set -m; $newstr$app &)
-        #$newstr$app
-        #$SHELL
-        chmod 4775 $newstr/chrome-sandbox
-        chmod +x $newstr/aymusic
-        $newstr$app < /dev/null &> /dev/null & disown || $newstr$app --no-sandbox --no-zygote < /dev/null &> /dev/null & disown
-        #gnome-terminal echo
-        #gnome-terminal -- bash -c "echo {$app}; $SHELL"
+        if [ "$(stat -c '%a' $newstr/chrome-sandbox)" = "4755" ]; then
+            echo "chrome-sandbox has 4755 permissions"
+        else
+            bash -c "ulimit -n 128 && pkexec bash -c 'chown root:root $newstr/chrome-sandbox && chmod 4755 $newstr/chrome-sandbox'"
+        fi
+        chmod +x $newstr/chrome_crashpad_handler
+        chmod +x $newstr$app
+        # https://github.com/castlabs/electron-releases/issues/165
+        unset CHROME_DESKTOP
+        $newstr$app < /dev/null &> /dev/null & disown
+        notify-send -a "AyMusic" "Update" "App updated successfully."
     	exit 0
-        #./electron
     fi
 fi
