@@ -22,7 +22,7 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "electron": "github:castlabs/electron-releases#v37.2.5+wvcus",
+    "electron": "github:castlabs/electron-releases#v39.2.4+wvcus",
     "electron-builder": "^24.13.3"
   },
   "dependencies": {

@@ -52,6 +52,7 @@ async function createWindow() {
         width: 1280,
         height: 720,
         titleBarStyle: process.platform == "darwin" ? "hiddenInset" : "default",
+        trafficLightPosition: { x: 10, y: 12 },
         frame: process.platform != "win32",
         useContentSize: true,
         webPreferences: {
