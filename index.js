@@ -114,7 +114,7 @@ async function createWindow() {
             })
         }
         if (request.url.includes("app://data")) {
-            const relativePath = request.url.slice('app://cache/'.length)
+            const relativePath = request.url.slice('app://data/'.length)
             const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)
             if (!isSafe) {
                 return new Response('bad', {
