@@ -52,6 +52,7 @@ async function createWindow() {
         width: 1280,
         height: 720,
         titleBarStyle: process.platform == "darwin" ? "hiddenInset" : "default",
+        trafficLightPosition: { x: 10, y: 12 },
         frame: process.platform != "win32",
         useContentSize: true,
         webPreferences: {
@@ -113,7 +114,7 @@ async function createWindow() {
             })
         }
         if (request.url.includes("app://data")) {
-            const relativePath = request.url.slice('app://cache/'.length)
+            const relativePath = request.url.slice('app://data/'.length)
             const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)
             if (!isSafe) {
                 return new Response('bad', {

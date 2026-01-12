@@ -51,3 +51,4 @@ Electron application for AyMusic
 
 ## Other repos
 - [Android application of AyMusic](https://github.com/Shiyukine/AyMusic-Android)
+- [iOS application of AyMusic](https://github.com/Shiyukine/AyMusic-iOS)
