@@ -32,12 +32,16 @@ contextBridge.exposeInMainWorld("boundobject", {
     httpRequestGET: (url) => {
         return ipcRenderer.invoke("custom-fetch", { url: url, config: undefined })
     },
-    httpRequestPOST: (url, json) => {
+    httpRequestPOST: (url, json, contentType = null, headers = null) => {
         return ipcRenderer.invoke("custom-fetch", {
             url: url,
             config: {
                 method: "POST",
-                body: JSON.stringify(json)
+                body: JSON.stringify(json),
+                headers: {
+                    ...(JSON.parse(headers) || {}),
+                    ...(contentType ? { "Content-Type": contentType } : {})
+                }
             }
         })
     },
