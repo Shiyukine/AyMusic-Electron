@@ -18,8 +18,8 @@ async function getFiles(dir) {
 
 var configUpdate = {
     servUrl: "",
-    versionName: "0.3.7",
-    versionCode: 14,
+    versionName: "0.3.8",
+    versionCode: 15,
     isRelease: false,
     closing: false
 }
@@ -189,7 +189,7 @@ const searchUpdates = async (event) => {
             }
         }
         let files = await getFiles(appPath)
-        if(platform == "macos") {
+        if (platform == "macos") {
             // filter symlinks
             files = files.filter(file => !fs.lstatSync(file).isSymbolicLink());
         }
@@ -316,7 +316,7 @@ const searchUpdates = async (event) => {
             }
             else if (platform == "macos") {
                 fs.copyFileSync(appPath + "/Resources/updater/updater.command", appPath + "/Resources/updater/updaterTEMP.command")
-                const {spawn, execSync} = require("child_process");
+                const { spawn, execSync } = require("child_process");
                 execSync("chmod +x \"" + appPath + "/Resources/updater/updaterTEMP.command" + "\"");
                 let bat = spawn(appPath + "/Resources/updater/updaterTEMP.command", [
                     "--move-files",
