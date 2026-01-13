@@ -33,13 +33,19 @@ contextBridge.exposeInMainWorld("boundobject", {
         return ipcRenderer.invoke("custom-fetch", { url: url, config: undefined })
     },
     httpRequestPOST: (url, json, contentType = null, headers = null) => {
+        let newHeaders = {};
+        for (let obj of headers ? JSON.parse(headers) : []) {
+            let name = obj.name;
+            let value = obj.value;
+            newHeaders[name] = value;
+        }
         return ipcRenderer.invoke("custom-fetch", {
             url: url,
             config: {
                 method: "POST",
-                body: JSON.stringify(json),
+                body: typeof json === "string" ? json : JSON.stringify(json),
                 headers: {
-                    ...(JSON.parse(headers) || {}),
+                    ...newHeaders,
                     ...(contentType ? { "Content-Type": contentType } : {})
                 }
             }

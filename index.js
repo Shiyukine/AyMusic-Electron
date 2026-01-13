@@ -51,9 +51,16 @@ async function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
-        titleBarStyle: process.platform == "darwin" ? "hiddenInset" : "default",
+        titleBarStyle: process.platform == "darwin" ? "hiddenInset" : "hidden",
         trafficLightPosition: { x: 10, y: 12 },
-        frame: process.platform != "win32",
+        //frame: process.platform != "win32",
+        ...(process.platform === 'win32' ? {
+            titleBarOverlay: {
+                color: '#00000000',
+                symbolColor: '#ffffff',
+                height: 35
+            }
+        } : {}),
         useContentSize: true,
         webPreferences: {
             contextIsolation: true,

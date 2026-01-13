@@ -272,7 +272,7 @@ const callBoundObject = () => {
                     //"Pragma": "no-cache",
                     //'Cache-Control': 'no-cache'
                 }
-                
+
                 // Override headers for captcha requests
                 Object.keys(captchaHeaders).forEach(key => {
                     details.requestHeaders[key] = captchaHeaders[key];
