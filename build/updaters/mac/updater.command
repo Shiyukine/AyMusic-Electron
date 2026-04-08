@@ -27,7 +27,7 @@ done;
 if [ $refreshed = false ];
 then
     echo "To fully start app, we need to detach this child to the parent process. Restarting..."
-    $0 "$@" --refreshed < /dev/null &> /dev/null & disown
+    "$0" "$@" --refreshed < /dev/null &> /dev/null & disown
     exit 0
 else
     if [ $movefiles = true ];
@@ -38,11 +38,11 @@ else
         current=$0
         newstr=$(echo "$current" | sed 's|Resources/updater/updater.command||')
         newstr=$(echo "$newstr" | sed 's|Resources/updater/updaterTEMP.command||')
-        cp -rf $newstr/DownloadTemp/* $newstr/
-        rm -rf $newstr/DownloadTemp/
+        cp -rf "$newstr/DownloadTemp/*" "$newstr/"
+        rm -rf "$newstr/DownloadTemp/"
         echo "Update finished. Launching $app..."
-        chmod +x $newstr/MacOS/$app
-        $newstr/MacOS/$app < /dev/null &> /dev/null & disown
+        chmod +x "$newstr/MacOS/$app"
+        "$newstr/MacOS/$app" < /dev/null &> /dev/null & disown
     	exit 0
     fi
 fi

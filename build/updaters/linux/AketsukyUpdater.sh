@@ -36,7 +36,7 @@ done;
 if [ $refreshed = false ];
 then
     echo "To fully start app, we need to detach this child to the parent process. Restarting..."
-    $0 "$@" --refreshed < /dev/null &> /dev/null & disown
+    "$0" "$@" --refreshed < /dev/null &> /dev/null & disown
     exit 0
 else
     if [ $movefiles = true ];
@@ -44,22 +44,22 @@ else
         echo "Waiting 2s..."
         sleep 2
         echo "Applying update..."
-        current=$0
+        current="$0"
         newstr=${current/"AketsukyUpdater.sh"/""}
         newstr=${newstr/"AketsukyUpdaterTEMP.sh"/""}
-        cp -rf $newstr/DownloadTemp/* $newstr/
-        rm -rf $newstr/DownloadTemp/
+        cp -rf "$newstr/DownloadTemp/*" "$newstr/"
+        rm -rf "$newstr/DownloadTemp/"
         echo "Updated finished. Launching $app..."
-        if [ "$(stat -c '%a' $newstr/chrome-sandbox)" = "4755" ]; then
+        if [ "$(stat -c '%a' "$newstr/chrome-sandbox")" = "4755" ]; then
             echo "chrome-sandbox has 4755 permissions"
         else
             bash -c "ulimit -n 128 && pkexec bash -c 'chown root:root $newstr/chrome-sandbox && chmod 4755 $newstr/chrome-sandbox'"
         fi
-        chmod +x $newstr/chrome_crashpad_handler
-        chmod +x $newstr$app
+        chmod +x "$newstr/chrome_crashpad_handler"
+        chmod +x "$newstr$app"
         # https://github.com/castlabs/electron-releases/issues/165
         unset CHROME_DESKTOP
-        $newstr$app < /dev/null &> /dev/null & disown
+        "$newstr$app" < /dev/null &> /dev/null & disown
         notify-send -a "AyMusic" "Update" "App updated successfully."
     	exit 0
     fi
