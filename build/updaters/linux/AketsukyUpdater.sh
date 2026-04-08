@@ -47,7 +47,7 @@ else
         current="$0"
         newstr=${current/"AketsukyUpdater.sh"/""}
         newstr=${newstr/"AketsukyUpdaterTEMP.sh"/""}
-        cp -rf "$newstr/DownloadTemp/*" "$newstr/"
+        cp -rf "$newstr/DownloadTemp/"* "$newstr/"
         rm -rf "$newstr/DownloadTemp/"
         echo "Updated finished. Launching $app..."
         if [ "$(stat -c '%a' "$newstr/chrome-sandbox")" = "4755" ]; then

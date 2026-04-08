@@ -36,9 +36,9 @@ else
         sleep 2
         echo "Applying update..."
         current=$0
-        newstr=$(echo "$current" | sed 's|Resources/updater/updater.command||')
-        newstr=$(echo "$newstr" | sed 's|Resources/updater/updaterTEMP.command||')
-        cp -rf "$newstr/DownloadTemp/*" "$newstr/"
+        newstr=$(echo "$current" | sed 's|/Resources/updater/updater.command||')
+        newstr=$(echo "$newstr" | sed 's|/Resources/updater/updaterTEMP.command||')
+        cp -rf "$newstr/DownloadTemp/"* "$newstr/"
         rm -rf "$newstr/DownloadTemp/"
         echo "Update finished. Launching $app..."
         chmod +x "$newstr/MacOS/$app"
