@@ -1,4 +1,4 @@
-const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog, crashReporter, webFrame } = require('electron');
+const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog, crashReporter, webFrame, safeStorage } = require('electron');
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
@@ -44,6 +44,39 @@ mkdirp(app.getPath("appData") + "/AyMusic/Cache/Adblock/")
 
 const filter = {
     urls: ['*://*/*']
+}
+
+const COOKIE_STORE_PATH = path.join(app.getPath('userData'), 'session');
+
+function saveCookiesSecurely(cookies) {
+    if (!safeStorage.isEncryptionAvailable()) {
+        console.warn('safeStorage unavailable, skipping cookie persistence');
+        return;
+    }
+    const json = JSON.stringify(cookies);
+    const encrypted = safeStorage.encryptString(json);
+    fs.writeFileSync(COOKIE_STORE_PATH, encrypted);
+}
+
+function loadCookiesSecurely() {
+    if (!safeStorage.isEncryptionAvailable()) return [];
+    if (!fs.existsSync(COOKIE_STORE_PATH)) return [];
+    try {
+        const encrypted = fs.readFileSync(COOKIE_STORE_PATH);
+        const json = safeStorage.decryptString(encrypted);
+        return JSON.parse(json);
+    } catch (err) {
+        console.error('Failed to decrypt cookie store:', err);
+        return [];
+    }
+}
+
+function cookieToUrl(cookie) {
+    const protocol = cookie.secure ? 'https' : 'http';
+    const domain = cookie.domain.startsWith('.')
+        ? cookie.domain.slice(1)
+        : cookie.domain;
+    return `${protocol}://${domain}${cookie.path || '/'}`;
 }
 
 async function createWindow() {
@@ -211,6 +244,9 @@ async function createWindow() {
             e.preventDefault()
             dontClose = false
             console.log(await mainWindow.webContents.executeJavaScript("window.listeners.player.disconnect()"))
+            const cookies = await session.defaultSession.cookies.get({ session: true });
+            saveCookiesSecurely(cookies);
+            await session.defaultSession.cookies.flushStore();
             mainWindow.close();
         }
     })
@@ -218,12 +254,43 @@ async function createWindow() {
         console.log(await mainWindow.webContents.executeJavaScript("window.listeners.player.disconnect()"))
     })
     let modifySession = session.fromPartition("persist:modify")
+    const cookies = loadCookiesSecurely();
+
+    for (const cookie of cookies) {
+        try {
+            await modifySession.cookies.set({
+                url: cookieToUrl(cookie),
+                name: cookie.name,
+                value: cookie.value,
+                domain: cookie.domain,
+                path: cookie.path,
+                secure: cookie.secure,
+                httpOnly: cookie.httpOnly,
+                sameSite: cookie.sameSite,
+                // intentionally no expirationDate → keeps them as session cookies
+            });
+
+            await session.defaultSession.cookies.set({
+                url: cookieToUrl(cookie),
+                name: cookie.name,
+                value: cookie.value,
+                domain: cookie.domain,
+                path: cookie.path,
+                secure: cookie.secure,
+                httpOnly: cookie.httpOnly,
+                sameSite: cookie.sameSite,
+                // intentionally no expirationDate → keeps them as session cookies
+            });
+        } catch (err) {
+            console.warn(`Failed to restore cookie "${cookie.name}" for ${cookie.domain}:`, err);
+        }
+    }
     modifySession.cookies.on("changed", (e, cookie, cause, removed) => {
-        let cookieUrl = "http" + (cookie.secure ? "s" : "") + "://" + (cookie.domain.startsWith(".") ? cookie.domain.substring(1) : cookie.domain) + cookie.path
-        //console.log("Cookie changed", cookie.name, cookieUrl)
-        if (removed && cause != "overwrite") {
+        let cookieUrl = cookieToUrl(cookie)
+        //console.log("Cookie changed", removed, cause, cookieUrl, cookie)
+        if (removed) {
             session.defaultSession.cookies.remove(cookieUrl, cookie.name).catch((e) => {
-                console.error("Unable to remove cookie", cookie.name, cookieUrl, e)
+                console.error("Unable to remove cookie", cookie.name, cookieUrl, cookie.secure, cookie.path, e)
             })
         }
         else {
@@ -231,7 +298,7 @@ async function createWindow() {
                 url: cookieUrl,
                 name: cookie.name,
                 value: cookie.value,
-                domain: cookie.domain,
+                ...(cookie.name.startsWith("__Host-") ? {} : { domain: cookie.domain }),
                 httpOnly: cookie.httpOnly,
                 secure: cookie.secure,
                 expirationDate: cookie.expirationDate,
@@ -240,7 +307,7 @@ async function createWindow() {
                 session: cookie.session,
                 path: cookie.path,
             }).catch((e) => {
-                console.error("Unable to set cookie", cookie.name, cookieUrl, e)
+                console.error("Unable to set cookie", cookie.name, cookieUrl, cookie.secure, cookie.path, e)
             })
         }
         session.defaultSession.cookies.flushStore()

@@ -20,6 +20,14 @@ function mkdirp(dir) {
     fs.mkdirSync(dir);
 }
 
+function cookieToUrl(cookie) {
+    const protocol = cookie.secure ? 'https' : 'http';
+    const domain = cookie.domain.startsWith('.')
+        ? cookie.domain.slice(1)
+        : cookie.domain;
+    return `${protocol}://${domain}${cookie.path || '/'}`;
+}
+
 const callBoundObject = () => {
     var curPlatform = process.platform
     if (curPlatform == "darwin") curPlatform = "MacOS"
@@ -27,9 +35,7 @@ const callBoundObject = () => {
     if (curPlatform == "linux") curPlatform = "Linux"
     const rpc = new DiscordRPC.Client({ transport: 'ipc' });
     const clientId = process.env.DISCORD_CLIENT_ID;
-    if (process.platform == "win32") {
-        rpc.login({ clientId }).catch(console.error);
-    }
+    rpc.login({ clientId }).catch(console.error);
 
     ipcMain.on('set-ignore-mouse-events', (event, ignore, options) => {
         const win = BrowserWindow.fromWebContents(event.sender)
@@ -183,12 +189,9 @@ const callBoundObject = () => {
         let loginSession = session.fromPartition("persist:login")
         let modifySession = session.fromPartition("persist:modify")
         loginSession.cookies.on("changed", (e, cookie, cause, removed) => {
-            let cookieUrl = "http" + (cookie.secure ? "s" : "") + "://" + (cookie.domain.startsWith(".") ? cookie.domain.substring(1) : cookie.domain) + cookie.path
+            let cookieUrl = cookieToUrl(cookie)
             //console.log("Cookie changed", cookie.name, cookieUrl)
-            if (removed && cause != "overwrite") {
-                session.defaultSession.cookies.remove(cookieUrl, cookie.name).catch((e) => {
-                    console.error("Unable to remove cookie", cookie.name, cookieUrl, e)
-                })
+            if (removed) {
                 modifySession.cookies.remove(cookieUrl, cookie.name).catch((e) => {
                     console.error("Unable to remove cookie", cookie.name, cookieUrl, e)
                 })
@@ -198,7 +201,7 @@ const callBoundObject = () => {
                     url: cookieUrl,
                     name: cookie.name,
                     value: cookie.value,
-                    domain: cookie.domain,
+                    ...(cookie.name.startsWith("__Host-") ? {} : { domain: cookie.domain }),
                     httpOnly: cookie.httpOnly,
                     secure: cookie.secure,
                     expirationDate: cookie.expirationDate,
@@ -213,7 +216,7 @@ const callBoundObject = () => {
                     url: cookieUrl,
                     name: cookie.name,
                     value: cookie.value,
-                    domain: cookie.domain,
+                    ...(cookie.name.startsWith("__Host-") ? {} : { domain: cookie.domain }),
                     httpOnly: cookie.httpOnly,
                     secure: cookie.secure,
                     expirationDate: cookie.expirationDate,
@@ -351,20 +354,18 @@ const callBoundObject = () => {
     })
 
     ipcMain.on('discord-rpc', async (event, args, options) => {
-        if (process.platform == "win32") {
+        try {
+            if (args) rpc.setActivity(args);
+            else rpc.clearActivity();
+        }
+        catch {
             try {
+                rpc.login({ clientId }).catch(console.error);
                 if (args) rpc.setActivity(args);
                 else rpc.clearActivity();
             }
-            catch {
-                try {
-                    rpc.login({ clientId }).catch(console.error);
-                    if (args) rpc.setActivity(args);
-                    else rpc.clearActivity();
-                }
-                catch (e) {
-                    console.error(e)
-                }
+            catch (e) {
+                console.error(e)
             }
         }
     })
