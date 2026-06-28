@@ -106,10 +106,16 @@ async function createWindow() {
     });
     if (maximize) mainWindow.maximize()
     mainWindow.on("maximize", (event, isAlwaysOnTop) => {
-        mainWindow.webContents.executeJavaScript("window.app.recieveEventClient('maximize')")
+        mainWindow.webContents.executeJavaScript("window.app.receiveEventClient('maximize')")
     })
     mainWindow.on("unmaximize", (event) => {
-        mainWindow.webContents.executeJavaScript("window.app.recieveEventClient('unmaximize')")
+        mainWindow.webContents.executeJavaScript("window.app.receiveEventClient('unmaximize')")
+    })
+    mainWindow.on("enter-full-screen", (event) => {
+        mainWindow.webContents.executeJavaScript("window.app.receiveEventClient('enter-fullscreen')")
+    })
+    mainWindow.on("leave-full-screen", (event) => {
+        mainWindow.webContents.executeJavaScript("window.app.receiveEventClient('leave-fullscreen')")
     })
     mainWindow.setMenuBarVisibility(false)
     protocol.handle('app', async (request) => {
@@ -456,6 +462,7 @@ protocol.registerSchemesAsPrivileged([
             supportFetchAPI: true,
             stream: true,
             allowServiceWorkers: true,
+            corsEnabled: true,
         }
     }
 ])
