@@ -47,7 +47,6 @@ const filter = {
 }
 
 const COOKIE_STORE_PATH = path.join(app.getPath('userData'), 'session');
-let safeStorageAvailable = safeStorage.isEncryptionAvailable();
 
 function saveCookiesSecurely(cookies) {
     if (!safeStorage.isEncryptionAvailable()) {
@@ -226,8 +225,8 @@ async function createWindow() {
                 mainWindow.webContents.executeJavaScript("window.forceRestart = true")
             }
         });
-        if (!safeStorageAvailable) {
-            mainWindow.webContents.executeJavaScript("newError('Cookie won't be persisted', 'You'll be disconnected from some platforms when you close the app. Please click on \"Always allow\" in order to avoid asking for permission every time.')")
+        if (!safeStorage.isEncryptionAvailable()) {
+            mainWindow.webContents.executeJavaScript("newError('Cookie won\\'t be persisted', 'You\\'ll be disconnected from some platforms when you close the app. Please click on \"Always allow\" in order to avoid asking for permission every time.')")
         }
         let sigPath = "";
         if (process.platform == "darwin") {
@@ -335,7 +334,7 @@ async function createWindow() {
         blocker.enableBlockingInSession(session.defaultSession);
     });
     protocol.handle('https', async (req) => {
-        return new Promise(async (callback) => {
+        return new Promise(async (callback, reject) => {
             if (isBadUrl(req.url)) {
                 callback(new Response(Buffer.from("blocked."), {
                     status: 200,
@@ -381,8 +380,8 @@ async function createWindow() {
 
             request.on('error', (error) => {
                 iframeStatus[req.url] = 2 // error
-                if (error.message.includes("net::ERR_BLOCKED_BY_CLIENT")) return
-                console.error('request error:', error);
+                if (!error.message.includes("net::ERR_BLOCKED_BY_CLIENT")) console.error('request error:', error);
+                reject(error);
             });
 
             request.on('redirect', (statusCode, method, redirectUrl, responseHeaders) => {
