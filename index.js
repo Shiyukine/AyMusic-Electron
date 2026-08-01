@@ -47,6 +47,7 @@ const filter = {
 }
 
 const COOKIE_STORE_PATH = path.join(app.getPath('userData'), 'session');
+let safeStorageAvailable = safeStorage.isEncryptionAvailable();
 
 function saveCookiesSecurely(cookies) {
     if (!safeStorage.isEncryptionAvailable()) {
@@ -225,6 +226,9 @@ async function createWindow() {
                 mainWindow.webContents.executeJavaScript("window.forceRestart = true")
             }
         });
+        if (!safeStorageAvailable) {
+            mainWindow.webContents.executeJavaScript("newError('Cookie won't be persisted', 'You'll be disconnected from some platforms when you close the app. Please click on \"Always allow\" in order to avoid asking for permission every time.')")
+        }
         let sigPath = "";
         if (process.platform == "darwin") {
             sigPath = app.getPath("exe");
