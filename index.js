@@ -391,6 +391,7 @@ async function createWindow() {
                     status: statusCode,
                     headers: responseHeaders,
                 }));
+                request.abort();
             });
 
             request.on('response', (response) => {

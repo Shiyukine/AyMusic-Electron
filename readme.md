@@ -12,7 +12,7 @@ This repository is the Electron application for AyMusic.
 1. Install node
 2. `npm install`
 3. `git restore .`: **important, will make musics working**
-4. Clone sub-modules
+4. Clone sub-modules: `git submodule update --init --recursive`
 
 ## How to use the app (development mode)
 1. In `res/main.js`, modify the line `94` to `if (true)` to use our public production server
@@ -22,6 +22,7 @@ This repository is the Electron application for AyMusic.
     - On macOS: launch the app with `npm run start:mac`
 
 ### Use Spotify (for Windows and macOS)
+0. **The app must be started at least once before doing this**: `npm start`
 1. Install Python 
 2. Install castlabs's EVS: `python3 -m pip install --upgrade castlabs-evs` (necessary to use Spotify)
 3. Connect to your EVS account: `python3 -m castlabs_evs.account reauth` or `python3 -m castlabs_evs.account signup`
@@ -51,8 +52,8 @@ This repository is the Electron application for AyMusic.
 ## How to do a release build for Linux
 1. Install Python
 2. Install `libarchive-tools`, like: `sudo apt install libarchive-tools` (Debian)
-2. Create file named `.env` in the root folder
-3. `npm run build:linux`
+3. Create file named `.env` in the root folder
+4. `npm run build:linux`
 
 ## Repos used
 - [AyMusic's WebAssets](https://github.com/Shiyukine/AyMusic-WebAssets)

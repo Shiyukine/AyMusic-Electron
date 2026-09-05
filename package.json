@@ -24,8 +24,8 @@
   "license": "ISC",
   "devDependencies": {
     "electron": "github:castlabs/electron-releases#v43.0.0+wvcus",
-    "eslint": "^10.6.0",
-    "electron-builder": "^26.5.0"
+    "electron-builder": "^26.5.0",
+    "eslint": "^10.6.0"
   },
   "dependencies": {
     "@cliqz/adblocker-electron": "^1.31.3",
