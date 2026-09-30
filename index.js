@@ -97,6 +97,9 @@ async function createWindow() {
         useContentSize: true,
         webPreferences: {
             contextIsolation: true,
+            ...(process.platform === 'darwin' ? {
+                scrollBounce: true,
+            } : {}),
             //nodeIntegration: true, //WARNING SECURITY RISKS !!!
             sandbox: false, //security risks ??
             preload: path.join(__dirname, "preload.js"),
