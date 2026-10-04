@@ -210,12 +210,13 @@ async function createWindow() {
         //for testing only
         //platform = "Android"
         mainWindow.webContents.executeJavaScript(`
-        var intev = setInterval(() => {
+        var intev = setInterval(async () => {
             if(!loaded) {
                 console.log('Attempt registerClient')
                 if(typeof app != 'undefined' && app) {
-                    app.registerClient('` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject,` + isPackaged + `)
-                    clearInterval(intev)
+                    if(await app.registerClient('` + platform + `', '` + "v" + configUpdate.versionName + "', " + configUpdate.versionCode + `, window.boundobject,` + isPackaged + `)) {
+                        clearInterval(intev)
+                    }
                 }
             }
             else {
