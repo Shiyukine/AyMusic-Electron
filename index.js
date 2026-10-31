@@ -1,10 +1,11 @@
-const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog, crashReporter, webFrame, safeStorage } = require('electron');
+const { app, components, BrowserWindow, session, protocol, net, webFrameMain, webContents, dialog, crashReporter, webFrame, safeStorage, Menu, } = require('electron');
 const path = require("path");
 const url = require('url');
 var fs = require('fs');
 var { callBoundObject, codeInjecter, clientToken, overrideResponses, iframeStatus } = require("./boundobject.js")
 var { initLogs, addLogs } = require("./logger.js")
 var { ElectronBlocker } = require("@cliqz/adblocker-electron");
+const { shell } = require('electron/common')
 //import { ElectronBlocker } from '@cliqz/adblocker-electron';
 var { configUpdate } = require("./update.js");
 const isPackaged = app.isPackaged;
@@ -266,6 +267,57 @@ async function createWindow() {
     mainWindow.on("session-end", async (e) => {
         console.log(await mainWindow.webContents.executeJavaScript("window.listeners.player.disconnect()"))
     })
+
+    // https://www.electronjs.org/docs/latest/tutorial/application-menu
+    const isMac = process.platform === 'darwin'
+    const template = [
+        // { role: 'appMenu' }
+        ...(isMac
+            ? [
+                {
+                    label: app.name,
+                    submenu: [
+                        { role: 'about' },
+                        { type: 'separator' },
+                        { role: 'services' },
+                        { type: 'separator' },
+                        {
+                            label: 'Settings',
+                            click: async () => {
+                                mainWindow.webContents.executeJavaScript('document.getElementById("menu_win").changeWindow(4, "Settings")')
+                            },
+                            accelerator: 'CommandOrControl+,'
+                        },
+                        { type: 'separator' },
+                        { role: 'hide' },
+                        { role: 'hideOthers' },
+                        { role: 'unhide' },
+                        { type: 'separator' },
+                        { role: 'quit' }
+                    ]
+                }
+            ]
+            : []),
+        { role: 'fileMenu' },
+        { role: 'editMenu' },
+        { role: 'viewMenu' },
+        { role: 'windowMenu' },
+        {
+            role: 'help',
+            submenu: [
+                {
+                    label: 'Aketsuky website',
+                    click: async () => {
+                        if (configUpdate.servUrl) await shell.openExternal(configUpdate.servUrl);
+                    }
+                }
+            ]
+        }
+    ]
+
+    const menu = Menu.buildFromTemplate(template)
+    Menu.setApplicationMenu(menu)
+
     let modifySession = session.fromPartition("persist:modify")
     const cookies = loadCookiesSecurely();
 
